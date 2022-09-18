@@ -1,0 +1,316 @@
+DIGEST 0d83ad8406a1f52e4cd35f100aebcbba
+FPL.CoqInductiveType
+R108:124 Coq.ZArith.ZArith <> <> lib
+R142:160 Coq.micromega.Psatz <> <> lib
+ind 248:251 <> tree
+constr 264:267 <> Leaf
+constr 277:280 <> Node
+R270:273 PL.CoqInductiveType <> tree:1 ind
+R286:289 PL.CoqInductiveType <> tree:1 ind
+binder 283:283 <> l:3
+R296:296 Coq.Numbers.BinNums <> Z ind
+binder 293:293 <> v:4
+R303:306 PL.CoqInductiveType <> tree:1 ind
+binder 300:300 <> r:5
+R310:313 PL.CoqInductiveType <> tree:1 ind
+def 726:736 <> tree_height
+R742:745 PL.CoqInductiveType <> tree ind
+binder 739:739 <> t:6
+R749:749 Coq.Numbers.BinNums <> Z ind
+R762:762 PL.CoqInductiveType <> t:6 var
+R773:776 PL.CoqInductiveType <> Leaf constr
+R787:790 PL.CoqInductiveType <> Node constr
+R838:840 Coq.ZArith.BinInt <> ::Z_scope:x_'+'_x not
+R801:805 Coq.ZArith.BinInt Z max def
+R808:818 PL.CoqInductiveType <> tree_height:7 def
+R824:834 PL.CoqInductiveType <> tree_height:7 def
+def 859:867 <> tree_size
+R873:876 PL.CoqInductiveType <> tree ind
+binder 870:870 <> t:9
+R880:880 Coq.Numbers.BinNums <> Z ind
+R893:893 PL.CoqInductiveType <> t:9 var
+R904:907 PL.CoqInductiveType <> Leaf constr
+R918:921 PL.CoqInductiveType <> Node constr
+R957:959 Coq.ZArith.BinInt <> ::Z_scope:x_'+'_x not
+R943:945 Coq.ZArith.BinInt <> ::Z_scope:x_'+'_x not
+R932:940 PL.CoqInductiveType <> tree_size:10 def
+R946:954 PL.CoqInductiveType <> tree_size:10 def
+def 1097:1108 <> tree_reverse
+R1114:1117 PL.CoqInductiveType <> tree ind
+binder 1111:1111 <> t:12
+R1121:1124 PL.CoqInductiveType <> tree ind
+R1137:1137 PL.CoqInductiveType <> t:12 var
+R1148:1151 PL.CoqInductiveType <> Leaf constr
+R1156:1159 PL.CoqInductiveType <> Leaf constr
+R1165:1168 PL.CoqInductiveType <> Node constr
+R1179:1182 PL.CoqInductiveType <> Node constr
+R1185:1196 PL.CoqInductiveType <> tree_reverse:13 def
+R1204:1215 PL.CoqInductiveType <> tree_reverse:13 def
+def 1657:1676 <> tree_reverse_example
+R1795:1801 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R1681:1692 PL.CoqInductiveType <> tree_reverse def
+R1699:1702 PL.CoqInductiveType <> Node constr
+R1712:1715 PL.CoqInductiveType <> Node constr
+R1717:1720 PL.CoqInductiveType <> Leaf constr
+R1724:1727 PL.CoqInductiveType <> Leaf constr
+R1747:1750 PL.CoqInductiveType <> Node constr
+R1753:1756 PL.CoqInductiveType <> Node constr
+R1758:1761 PL.CoqInductiveType <> Leaf constr
+R1765:1768 PL.CoqInductiveType <> Leaf constr
+R1774:1777 PL.CoqInductiveType <> Node constr
+R1779:1782 PL.CoqInductiveType <> Leaf constr
+R1788:1791 PL.CoqInductiveType <> Leaf constr
+R1802:1805 PL.CoqInductiveType <> Node constr
+R1812:1815 PL.CoqInductiveType <> Node constr
+R1818:1821 PL.CoqInductiveType <> Node constr
+R1823:1826 PL.CoqInductiveType <> Leaf constr
+R1832:1835 PL.CoqInductiveType <> Leaf constr
+R1841:1844 PL.CoqInductiveType <> Node constr
+R1846:1849 PL.CoqInductiveType <> Leaf constr
+R1853:1856 PL.CoqInductiveType <> Leaf constr
+R1871:1874 PL.CoqInductiveType <> Node constr
+R1876:1879 PL.CoqInductiveType <> Leaf constr
+R1883:1886 PL.CoqInductiveType <> Leaf constr
+prf 3186:3197 <> reverse_size
+binder 3207:3207 <> t:15
+R3238:3240 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R3212:3220 PL.CoqInductiveType <> tree_size def
+R3223:3234 PL.CoqInductiveType <> tree_reverse def
+R3236:3236 PL.CoqInductiveType <> t:15 var
+R3241:3249 PL.CoqInductiveType <> tree_size def
+R3251:3251 PL.CoqInductiveType <> t:15 var
+prf 4459:4472 <> reverse_height
+binder 4482:4482 <> t:16
+R4515:4517 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R4487:4497 PL.CoqInductiveType <> tree_height def
+R4500:4511 PL.CoqInductiveType <> tree_reverse def
+R4513:4513 PL.CoqInductiveType <> t:16 var
+R4518:4528 PL.CoqInductiveType <> tree_height def
+R4530:4530 PL.CoqInductiveType <> t:16 var
+prf 4849:4871 <> reverse_height_attempt2
+binder 4881:4881 <> t:17
+R4914:4916 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R4886:4896 PL.CoqInductiveType <> tree_height def
+R4899:4910 PL.CoqInductiveType <> tree_reverse def
+R4912:4912 PL.CoqInductiveType <> t:17 var
+R4917:4927 PL.CoqInductiveType <> tree_height def
+R4929:4929 PL.CoqInductiveType <> t:17 var
+prf 5516:5533 <> reverse_involutive
+binder 5543:5543 <> t:18
+R5577:5579 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R5548:5559 PL.CoqInductiveType <> tree_reverse def
+R5562:5573 PL.CoqInductiveType <> tree_reverse def
+R5575:5575 PL.CoqInductiveType <> t:18 var
+R5580:5580 PL.CoqInductiveType <> t:18 var
+prf 5615:5625 <> reverse_inv
+binder 5635:5636 <> t1:19
+binder 5638:5639 <> t2:20
+R5664:5669 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R5659:5661 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R5644:5655 PL.CoqInductiveType <> tree_reverse def
+R5657:5658 PL.CoqInductiveType <> t1:19 var
+R5662:5663 PL.CoqInductiveType <> t2:20 var
+R5672:5674 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R5670:5671 PL.CoqInductiveType <> t1:19 var
+R5675:5686 PL.CoqInductiveType <> tree_reverse def
+R5688:5689 PL.CoqInductiveType <> t2:20 var
+R5826:5842 Coq.Strings.Ascii <> <> lib
+R5860:5877 Coq.Strings.String <> <> lib
+R6009:6014 Coq.Strings.String <> string ind
+R6206:6216 Coq.Strings.String <> EmptyString constr
+R6252:6257 Coq.Strings.String <> String constr
+R6269:6274 Coq.Strings.String <> String constr
+R6285:6295 Coq.Strings.String <> EmptyString constr
+def 6580:6589 <> string_app
+R6599:6604 Coq.Strings.String <> string ind
+binder 6592:6593 <> s1:21
+binder 6595:6596 <> s2:22
+R6608:6613 Coq.Strings.String <> string ind
+R6626:6627 PL.CoqInductiveType <> s1:21 var
+R6638:6648 Coq.Strings.String <> EmptyString constr
+R6653:6654 PL.CoqInductiveType <> s2:22 var
+R6660:6665 Coq.Strings.String <> String constr
+R6676:6681 Coq.Strings.String <> String constr
+R6686:6695 PL.CoqInductiveType <> string_app:23 def
+R6701:6702 PL.CoqInductiveType <> s2:22 var
+def 6722:6731 <> string_rev
+R6737:6742 Coq.Strings.String <> string ind
+binder 6734:6734 <> s:25
+R6746:6751 Coq.Strings.String <> string ind
+R6764:6764 PL.CoqInductiveType <> s:25 var
+R6775:6785 Coq.Strings.String <> EmptyString constr
+R6790:6800 Coq.Strings.String <> EmptyString constr
+R6806:6811 Coq.Strings.String <> String constr
+R6821:6830 PL.CoqInductiveType <> string_app def
+R6833:6842 PL.CoqInductiveType <> string_rev:26 def
+R6849:6854 Coq.Strings.String <> String constr
+R6858:6868 Coq.Strings.String <> EmptyString constr
+prf 6983:6998 <> string_app_assoc
+binder 7008:7009 <> s1:28
+binder 7011:7012 <> s2:29
+binder 7014:7015 <> s3:30
+R7052:7056 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R7020:7029 PL.CoqInductiveType <> string_app def
+R7031:7032 PL.CoqInductiveType <> s1:28 var
+R7035:7044 PL.CoqInductiveType <> string_app def
+R7046:7047 PL.CoqInductiveType <> s2:29 var
+R7049:7050 PL.CoqInductiveType <> s3:30 var
+R7057:7066 PL.CoqInductiveType <> string_app def
+R7069:7078 PL.CoqInductiveType <> string_app def
+R7080:7081 PL.CoqInductiveType <> s1:28 var
+R7083:7084 PL.CoqInductiveType <> s2:29 var
+R7087:7088 PL.CoqInductiveType <> s3:30 var
+prf 7246:7263 <> string_app_empty_r
+binder 7273:7273 <> s:31
+R7293:7295 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R7278:7287 PL.CoqInductiveType <> string_app def
+R7289:7289 PL.CoqInductiveType <> s:31 var
+R7296:7296 PL.CoqInductiveType <> s:31 var
+prf 7457:7470 <> string_rev_app
+binder 7480:7481 <> s1:32
+binder 7483:7484 <> s2:33
+R7518:7522 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R7489:7498 PL.CoqInductiveType <> string_rev def
+R7501:7510 PL.CoqInductiveType <> string_app def
+R7512:7513 PL.CoqInductiveType <> s1:32 var
+R7515:7516 PL.CoqInductiveType <> s2:33 var
+R7523:7532 PL.CoqInductiveType <> string_app def
+R7535:7544 PL.CoqInductiveType <> string_rev def
+R7546:7547 PL.CoqInductiveType <> s2:33 var
+R7551:7560 PL.CoqInductiveType <> string_rev def
+R7562:7563 PL.CoqInductiveType <> s1:32 var
+R7780:7782 Coq.Init.Datatypes <> nat ind
+mod 8190:8196 <> NatDemo
+ind 8246:8248 NatDemo nat
+constr 8255:8255 NatDemo O
+constr 8265:8265 NatDemo S
+R8259:8261 PL.CoqInductiveType <> nat:34 ind
+R8271:8273 PL.CoqInductiveType <> nat:34 ind
+binder 8268:8268 <> n:36
+R8277:8279 PL.CoqInductiveType <> nat:34 ind
+def 8327:8330 NatDemo plus
+R8338:8340 PL.CoqInductiveType NatDemo nat ind
+binder 8333:8333 <> n:37
+binder 8335:8335 <> m:38
+R8344:8346 PL.CoqInductiveType NatDemo nat ind
+R8359:8359 PL.CoqInductiveType <> n:37 var
+R8370:8370 PL.CoqInductiveType NatDemo O constr
+R8375:8375 PL.CoqInductiveType <> m:38 var
+R8381:8381 PL.CoqInductiveType NatDemo S constr
+R8389:8389 PL.CoqInductiveType NatDemo S constr
+R8392:8395 PL.CoqInductiveType <> plus:39 def
+R8400:8400 PL.CoqInductiveType <> m:38 var
+prf 8457:8465 NatDemo plus_comm
+binder 8475:8475 <> n:41
+binder 8477:8477 <> m:42
+R8490:8492 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R8482:8485 PL.CoqInductiveType NatDemo plus def
+R8487:8487 PL.CoqInductiveType <> n:41 var
+R8489:8489 PL.CoqInductiveType <> m:42 var
+R8493:8496 PL.CoqInductiveType NatDemo plus def
+R8498:8498 PL.CoqInductiveType <> m:42 var
+R8500:8500 PL.CoqInductiveType <> n:41 var
+R8532:8538 PL.CoqInductiveType NatDemo <> mod
+mod 8590:8596 <> WhileDB
+def 8697:8704 WhileDB var_name
+R8715:8720 Coq.Strings.String <> string ind
+ind 8787:8791 WhileDB binop
+constr 8807:8809 WhileDB OOr
+constr 8813:8816 WhileDB OAnd
+constr 8822:8824 WhileDB OLt
+constr 8828:8830 WhileDB OLe
+constr 8834:8836 WhileDB OGt
+constr 8840:8842 WhileDB OGe
+constr 8846:8848 WhileDB OEq
+constr 8852:8854 WhileDB ONe
+constr 8860:8864 WhileDB OPlus
+constr 8868:8873 WhileDB OMinus
+constr 8877:8880 WhileDB OMul
+constr 8884:8887 WhileDB ODiv
+constr 8891:8894 WhileDB OMod
+ind 8908:8911 WhileDB unop
+constr 8927:8930 WhileDB ONot
+constr 8934:8937 WhileDB ONeg
+ind 8998:9001 WhileDB expr
+constr 9017:9020 WhileDB ENum
+constr 9034:9037 WhileDB EVar
+constr 9058:9063 WhileDB EBinop
+constr 9096:9100 WhileDB EUnop
+constr 9127:9132 WhileDB EDeref
+constr 9148:9154 WhileDB EMalloc
+constr 9170:9177 WhileDB EReadInt
+constr 9183:9191 WhileDB EReadChar
+R9027:9027 Coq.Numbers.BinNums <> Z ind
+binder 9023:9023 <> n:49
+R9044:9051 PL.CoqInductiveType WhileDB var_name def
+binder 9040:9040 <> x:50
+R9070:9074 PL.CoqInductiveType WhileDB binop ind
+binder 9066:9067 <> op:51
+R9086:9089 PL.CoqInductiveType <> expr:47 ind
+binder 9078:9079 <> e1:52
+binder 9081:9082 <> e2:53
+R9107:9110 PL.CoqInductiveType WhileDB unop ind
+binder 9103:9104 <> op:54
+R9117:9120 PL.CoqInductiveType <> expr:47 ind
+binder 9114:9114 <> e:55
+R9138:9141 PL.CoqInductiveType <> expr:47 ind
+binder 9135:9135 <> e:56
+R9160:9163 PL.CoqInductiveType <> expr:47 ind
+binder 9157:9157 <> e:57
+ind 9255:9257 WhileDB com
+constr 9273:9277 WhileDB CDecl
+constr 9297:9300 WhileDB CAss
+constr 9320:9323 WhileDB CSeq
+constr 9343:9345 WhileDB CIf
+constr 9376:9381 WhileDB CWhile
+R9283:9290 PL.CoqInductiveType WhileDB var_name def
+binder 9280:9280 <> x:60
+R9310:9313 PL.CoqInductiveType WhileDB expr ind
+binder 9303:9304 <> e1:61
+binder 9306:9307 <> e2:62
+R9334:9336 PL.CoqInductiveType <> com:58 ind
+binder 9326:9327 <> c1:63
+binder 9329:9330 <> c2:64
+R9352:9355 PL.CoqInductiveType WhileDB expr ind
+binder 9348:9348 <> e:65
+R9367:9369 PL.CoqInductiveType <> com:58 ind
+binder 9359:9360 <> c1:66
+binder 9362:9363 <> c2:67
+R9388:9391 PL.CoqInductiveType WhileDB expr ind
+binder 9384:9384 <> e:68
+R9399:9401 PL.CoqInductiveType <> com:58 ind
+binder 9395:9395 <> c:69
+def 9686:9701 WhileDB CSeq_right_assoc
+R9710:9712 PL.CoqInductiveType WhileDB com ind
+binder 9704:9704 <> c:70
+binder 9706:9707 <> c0:71
+R9716:9718 PL.CoqInductiveType WhileDB com ind
+R9731:9731 PL.CoqInductiveType <> c:70 var
+R9742:9745 PL.CoqInductiveType WhileDB CSeq constr
+R9756:9759 PL.CoqInductiveType WhileDB CSeq constr
+R9765:9780 PL.CoqInductiveType <> CSeq_right_assoc:72 def
+R9785:9786 PL.CoqInductiveType <> c0:71 var
+R9798:9801 PL.CoqInductiveType WhileDB CSeq constr
+R9803:9803 PL.CoqInductiveType <> c:70 var
+R9805:9806 PL.CoqInductiveType <> c0:71 var
+def 9921:9931 WhileDB right_assoc
+R9937:9939 PL.CoqInductiveType WhileDB com ind
+binder 9934:9934 <> c:74
+R9943:9945 PL.CoqInductiveType WhileDB com ind
+R9958:9958 PL.CoqInductiveType <> c:74 var
+R9969:9973 PL.CoqInductiveType WhileDB CDecl constr
+R9980:9984 PL.CoqInductiveType WhileDB CDecl constr
+R9992:9995 PL.CoqInductiveType WhileDB CAss constr
+R10006:10009 PL.CoqInductiveType WhileDB CAss constr
+R10021:10024 PL.CoqInductiveType WhileDB CSeq constr
+R10035:10050 PL.CoqInductiveType WhileDB CSeq_right_assoc def
+R10053:10063 PL.CoqInductiveType <> right_assoc:75 def
+R10070:10080 PL.CoqInductiveType <> right_assoc:75 def
+R10090:10092 PL.CoqInductiveType WhileDB CIf constr
+R10105:10107 PL.CoqInductiveType WhileDB CIf constr
+R10112:10122 PL.CoqInductiveType <> right_assoc:75 def
+R10129:10139 PL.CoqInductiveType <> right_assoc:75 def
+R10149:10154 PL.CoqInductiveType WhileDB CWhile constr
+R10164:10169 PL.CoqInductiveType WhileDB CWhile constr
+R10174:10184 PL.CoqInductiveType <> right_assoc:75 def
+R10203:10209 PL.CoqInductiveType WhileDB <> mod
