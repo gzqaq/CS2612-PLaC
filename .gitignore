@@ -1,0 +1,5 @@
+# Coq cache
+.lia.cache
+
+# No need for tracking lecture notes
+lec_notes/
