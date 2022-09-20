@@ -389,7 +389,9 @@ Inductive com : Type :=
   | CAss (e1 e2: expr)
   | CSeq (c1 c2 : com)
   | CIf (e : expr) (c1 c2 : com)
-  | CWhile (e : expr) (c : com).
+  | CWhile (e : expr) (c : com)
+  | CWriteInt (e : expr)
+  | CWriteChar (e : expr).
 
 (** 下面我们定义一项简单的程序变换：右结合变换。例如，将_[(c1;c2);c3]_变换为
     _[c1;(c2;c3)]_。*)
@@ -402,14 +404,22 @@ Fixpoint CSeq_right_assoc (c c0: com): com :=
   | _ => CSeq c c0
   end.
 
+(*
+c = cx1; (cx2; cx3)
+c0= cy1; (cy2; cy3)
+
+cx3; (cy1; (cy2; cy3))
+cx2; (cx3; (cy1; (cy2; cy3)))
+cx1; (cx2; (cx3; (cy1; (cy2; cy3))))
+ *)
+
 (** 现在，可以在_[CSeq_right_assoc]_的基础上定义右结合变换_[right_assoc]_。*)
 Fixpoint right_assoc (c: com): com :=
   match c with
-  | CDecl x => CDecl x
-  | CAss e1 e2 => CAss e1 e2
   | CSeq c1 c2 => CSeq_right_assoc (right_assoc c1) (right_assoc c2)
   | CIf e c1 c2 => CIf e (right_assoc c1) (right_assoc c2)
   | CWhile e c1 => CWhile e (right_assoc c1)
+  | _ => c  (* 其余语句均为简单语句，右结合变换后保持不变 *)
   end.
 
 
