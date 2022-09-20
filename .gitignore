@@ -1,10 +1,13 @@
 # Coq cache
 .lia.cache
 
-# No need for tracking lecture notes
+# No need for tracking lecture notes and textbooks
 lec_notes/
+textbooks/
 
-# Track only Coq scripts in the textbook
+# Track only Coq scripts in Software Foundation
 *.html
 *.svg
 *common/
+Software_Foundation/*/LICENSE
+Software_Foundation/*/README
