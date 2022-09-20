@@ -3,3 +3,8 @@
 
 # No need for tracking lecture notes
 lec_notes/
+
+# Track only Coq scripts in the textbook
+*.html
+*.svg
+*common/
