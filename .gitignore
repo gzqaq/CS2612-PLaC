@@ -1,5 +1,13 @@
 # Coq cache
 .lia.cache
+*.aux
+*.coq.d
+*.glob
+*.vo
+*.vok
+*.vos
+*.coq
+*.coq.conf
 
 # No need for tracking lecture notes and textbooks
 lec_notes/
