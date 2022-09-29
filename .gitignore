@@ -1,13 +1,16 @@
 # Coq cache
 .lia.cache
 *.aux
-*.coq.d
+*.d
 *.glob
 *.vo
 *.vok
 *.vos
 *.coq
-*.coq.conf
+*.conf
+
+# Don't track pdf files
+*.pdf
 
 # No need for tracking lecture notes and textbooks
 lec_notes/
@@ -19,3 +22,7 @@ textbooks/
 *common/
 Software_Foundation/*/LICENSE
 Software_Foundation/*/README
+
+# Track only tex files in assignments
+*.png
+*.jpeg
