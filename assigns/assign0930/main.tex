@@ -1,0 +1,118 @@
+\documentclass[12pt]{article}
+
+\usepackage{geometry}
+\geometry{a4paper}
+
+\usepackage{graphicx}
+\usepackage{caption}
+
+\usepackage{ctex}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+
+\lstset{
+  frame=single,
+  framerule=0pt,
+  backgroundcolor=\color{gray!15},
+  xleftmargin=2em,
+}
+
+
+\title{Assignment 0930}
+\author{Ziqin Gong $\quad$ 520030910216}
+\date{}
+
+\begin{document}
+  \maketitle
+
+  \section*{1}
+
+    可能有歧义。例如：
+    \begin{lstlisting}
+IF ID THEN IF ID THEN PRINT ( ID ) ELSE PRINT ( ID )
+    \end{lstlisting}
+
+  \section*{2}
+  
+    可能有歧义。例如：
+    \begin{lstlisting}
+* ID + ID
+    \end{lstlisting}
+
+  \section*{3}
+  \vspace{-10pt}
+
+    \subsection*{(a)}
+
+    \begin{lstlisting}
+E                         -> F * ( ID + ID )
+-> F                      -> G * ( ID + ID )
+-> F * G                  -> ( E ) * ( ID + ID )
+-> F * ( E )              -> ( E + F ) * ( ID + ID )
+-> F * ( E + F )          -> ( E + G ) * ( ID + ID )
+-> F * ( E + G )          -> ( E + ID ) * ( ID + ID )
+-> F * ( E + ID )         -> ( F + ID ) * ( ID + ID )
+-> F * ( F + ID )         -> ( G + ID ) * ( ID + ID )
+-> F * ( G + ID )         -> ( ID + ID ) * ( ID + ID )
+    \end{lstlisting}
+
+    \subsection*{(b)}
+
+    \begin{lstlisting}
+| ID * ( ID + ID ) + ID
+ID | * ( ID + ID ) + ID
+G | * ( ID + ID ) + ID
+F | * ( ID + ID ) + ID
+F * | ( ID + ID ) + ID
+F * ( | ID + ID ) + ID
+F * ( ID | + ID ) + ID
+F * ( G | + ID ) + ID
+F * ( F | + ID ) + ID
+F * ( E | + ID ) + ID
+F * ( E + | ID ) + ID
+F * ( E + ID | ) + ID
+F * ( E + G | ) + ID
+F * ( E + F | ) + ID
+F * ( E | ) + ID
+F * ( E ) | + ID
+F * G | + ID
+F | + ID
+E | + ID
+E + | ID
+E + ID |
+E + G |
+E + F |
+E |
+    \end{lstlisting}
+
+  \section*{4}
+
+    例子：
+    \begin{lstlisting}
+ID + ID [ NAT ]
+    \end{lstlisting}
+
+    修改后的语法：
+    \begin{lstlisting}
+E -> F         F -> F [ E ]
+E -> E + F     F -> ID
+               F -> NAT
+    \end{lstlisting}
+
+  \section*{5}
+
+    例子：
+    \begin{lstlisting}
+PRINT ( ID ) ; PRINT ( ID ) ; PRINT ( ID ) 
+    \end{lstlisting}
+
+    修改后的语法：
+    \begin{lstlisting}
+S -> H       H -> ID := E       E -> F       F -> ID
+S -> H ; S   H -> PRINT ( E )   E -> E + F   F -> NAT
+    \end{lstlisting}
+
+\end{document}
