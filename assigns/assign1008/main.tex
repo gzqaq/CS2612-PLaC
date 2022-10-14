@@ -1,0 +1,174 @@
+\documentclass[12pt]{article}
+
+\usepackage{geometry}
+\geometry{a4paper}
+
+\usepackage{graphicx}
+\usepackage{caption}
+
+\usepackage{ctex}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+
+\lstset{
+  frame=single,
+  framerule=0pt,
+  backgroundcolor=\color{gray!15},
+  xleftmargin=2em,
+}
+
+
+\title{Assignment 0930}
+\author{Ziqin Gong $\quad$ 520030910216}
+\date{}
+
+\begin{document}
+  \maketitle
+
+  \section*{1}
+
+    \subsection*{a.}
+     
+      存在。如\texttt{ID ) )}:
+      \begin{lstlisting}
+F * ( E + ( E + | ID ) )
+F * ( E + ( E + ID | ) )
+F * ( E + ( E + G | ) )
+F * ( E + ( E + F | ) )
+F * ( E + ( E | ) )
+F * ( E + ( E ) | )
+F * ( E + G | )
+F * ( E + F | )
+F * ( E | )
+F * ( E ) |
+F * G |
+F |
+E |
+      \end{lstlisting}
+
+    \subsection*{b.}
+
+      不存在。
+      \begin{lstlisting}
+初始状态：
+START -> . E
+E -> . F
+E -> . E + F
+F -> . G
+F -> . F * G
+G -> . ( E )
+G -> ID
+
+接收F：
+E -> F .
+F -> F . * G
+
+接收*：
+F -> F * . G
+G -> . ( E )
+G -> ID
+
+无法接收F
+      \end{lstlisting}
+
+  \section*{2}
+  
+    \begin{table}[!htp]
+      \centering
+      \begin{tabular}{ccc}
+      \hline
+      Symbols     & First Set       & Follow Set      \\ \hline
+      \texttt{E}  & \texttt{- ID (} & \texttt{+ - )}  \\
+      \texttt{G}  & \texttt{ID (}   & \texttt{+ - )}  \\
+      \texttt{ID} & \texttt{ID}     & \texttt{+ - )}  \\
+      \texttt{+}  & \texttt{+}      & \texttt{ID (}   \\
+      \texttt{-}  & \texttt{-}      & \texttt{ID (}   \\
+      \texttt{(}  & \texttt{(}      & \texttt{- ID (} \\
+      \texttt{)}  & \texttt{)}      & \texttt{+ - )}  \\ \hline
+      \end{tabular}
+    \end{table}
+
+  \section*{3}
+   
+    \begin{table}[!htp]
+      \centering
+      \begin{tabular}{ccc}
+      \hline
+      Symbols        & First Set             & Follow Set            \\ \hline
+      \texttt{P}     & \texttt{! ( ID QTF}   & \texttt{|| )}         \\
+      \texttt{Q}     & \texttt{! ( ID}       & \texttt{\&\& || )}    \\
+      \texttt{R}     & \texttt{! ( ID}       & \texttt{\&\& || )}    \\
+      \texttt{S}     & \texttt{( ID}         & \texttt{\&\& || )}    \\
+      \texttt{ID}    & \texttt{ID}           & \texttt{, \&\& || )}  \\
+      \texttt{||}    & \texttt{||}           & \texttt{! ( ID}       \\
+      \texttt{\&\&}  & \texttt{\&\&}         & \texttt{! ( ID}       \\
+      \texttt{!}     & \texttt{!}            & \texttt{( ID}         \\
+      \texttt{QTF}   & \texttt{QTF}          & \texttt{ID}           \\
+      \texttt{(}     & \texttt{(}            & \texttt{! ( ID QTF}   \\
+      \texttt{)}     & \texttt{)}            & \texttt{\&\& || )}    \\
+      \texttt{,}     & \texttt{,}            & \texttt{! ( ID QTF}   \\ \hline
+      \end{tabular}
+    \end{table}
+
+  \section*{4}
+
+    \begin{lstlisting}
+初始：| ID + ( ID * ID + ID )
+移入：ID | + ( ID * ID + ID )
+规约：G | + ( ID * ID + ID )，因为ID + 不可行
+规约：F | + ( ID * ID + ID )，因为G + 不可行
+规约：E | + ( ID * ID + ID )，因为F + 不可行
+移入：E + | ( ID * ID + ID )
+移入：E + ( | ID * ID + ID )
+移入：E + ( ID | * ID + ID )
+规约：E + ( G | * ID + ID )，因为E + ( ID * 不可行
+规约：E + ( F | * ID + ID )，因为E + ( G * 不可行
+移入：E + ( F * | ID + ID )，因为*不是Follow(E)中的元素
+移入：E + ( F * ID | + ID )
+规约：E + ( F * G | + ID )，因为E + ( F * ID + 不可行
+规约：E + ( F | + ID )，因为另外两种都不可行
+规约：E + ( E | + ID )，因为E + ( F + 不可行
+移入：E + ( E + | ID )
+移入：E + ( E + ID | )
+规约：E + ( E + G | )，因为E + ( E + ID ) 不可行
+规约：E + ( E + F | )，因为E + ( E + G ) 不可行
+规约：E + ( E | )，因为另外两种都不可行
+移入：E + ( E ) |
+规约：E + G |
+规约：E + F |
+规约：E |，因为E + E 不可行
+
+    \end{lstlisting}
+
+  \section*{5}
+
+    \begin{lstlisting}
+初始: | ID + ID, ID, ID + ID
+移入: ID | + ID, ID, ID + ID
+规约: F | + ID, ID, ID + ID, 因为ID + 不可行
+规约: E | + ID, ID, ID + ID, 因为F + 不可行
+移入: E + | ID, ID, ID + ID, 因为+不在Follow(L)中
+移入: E + ID |, ID, ID + ID
+规约: E + F |, ID, ID + ID, 因为E + ID, 不可行
+规约: E |, ID, ID + ID, 因为另外两种都不可行
+规约: L |, ID, ID + ID, 因为E, 不可行
+移入: L, | ID, ID + ID
+移入: L, ID |, ID + ID
+规约: L, F |, ID + ID, 因为L, ID, 不可行
+规约: L, E |, ID + ID, 因为L, F, 不可行
+规约: L |, ID + ID, 因为另外两种都不可行
+移入: L, | ID + ID
+移入: L, ID | + ID
+规约: L, F | + ID, 因为L, ID + 不可行
+规约: L, E | + ID, 因为L, F + 不可行
+移入: L, E + | ID, 因为+不在Follow(L)中
+移入: L, E + ID |, 因为L + 不可行
+规约: L, E + F |
+规约: L, E |, 因为L, E + E 不可行
+规约: L |
+    \end{lstlisting}
+
+\end{document}
