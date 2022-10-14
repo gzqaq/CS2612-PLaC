@@ -5,15 +5,15 @@
 	#include "lexer.h"
 	void yyerror(char *);
 	int yylex(void);
-        struct cmd * root;
+  struct cmd * root;
 %}
 
 %union {
-unsigned int n;
-char * i;
-struct expr * e;
-struct cmd * c;
-void * none;
+  unsigned int n;
+  char * i;
+  struct expr * e;
+  struct cmd * c;
+  void * none;
 }
 
 // Terminals
