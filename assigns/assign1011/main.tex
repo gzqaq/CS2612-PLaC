@@ -1,0 +1,65 @@
+\documentclass[12pt]{article}
+
+\usepackage{geometry}
+\geometry{a4paper}
+
+\usepackage{graphicx}
+\usepackage{caption}
+
+\usepackage{ctex}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+
+\lstset{
+  frame=single,
+  framerule=0pt,
+  backgroundcolor=\color{gray!15},
+  xleftmargin=2em,
+}
+
+
+\title{Assignment 1011}
+\author{Ziqin Gong $\quad$ 520030910216}
+\date{}
+
+\begin{document}
+  \maketitle
+
+  \section*{1}
+
+    不会产生冲突。
+
+  \section*{2}
+  
+    会产生的两种移入/规约冲突如下：
+    \begin{lstlisting}
+1. E + E | [ ID ]
+2. E + E | + E
+    \end{lstlisting}
+
+    基于优先级与结合性的规则：
+    \begin{lstlisting}
+%left +
+%left [ ]
+    \end{lstlisting}
+
+  \section*{3}
+   
+    可能的移入/规约冲突如下：
+    \begin{lstlisting}
+IF E THEN IF E THEN S | ELSE SIMPLE;
+SIMPLE ; | SIMPLE ;
+    \end{lstlisting}
+
+    基于优先级与结合性的规则：
+    \begin{lstlisting}
+%left IF THEN
+%left ELSE
+%left { }
+%right ;
+    \end{lstlisting}
+
+\end{document}
