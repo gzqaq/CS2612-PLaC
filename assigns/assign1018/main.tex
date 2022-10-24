@@ -1,0 +1,68 @@
+\documentclass[12pt]{article}
+
+\usepackage{geometry}
+\geometry{a4paper}
+
+\usepackage{graphicx}
+\usepackage{caption}
+
+\usepackage{ctex}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+
+\lstset{
+  frame=single,
+  framerule=0pt,
+  backgroundcolor=\color{gray!15},
+  xleftmargin=2em,
+}
+
+
+\title{Assignment 1018}
+\author{Ziqin Gong $\quad$ 520030910216}
+\date{}
+
+\begin{document}
+  \maketitle
+
+  \section*{1}
+
+    \subsection{判断题1}
+    
+      是。
+
+    \subsection{判断题2}
+
+      是。
+
+    \subsection{证明or否定}
+
+      \begin{proof}
+
+        1) 显然当$e = n \textrm{ or } x$时，命题成立
+
+        2) 假设$\textrm{CF}(e_1) \equiv e_1, \textrm{CF}(e_2) \equiv e_2$.
+
+           若$e=e_1+e_2$.
+
+             若$e_1,e_2$都是常数，则显然成立。
+
+             否则，$\textrm{CF}(e_1+e_2) = \textrm{CF}(e_1)+\textrm{CF}(e_2) \equiv e_1 + e_2 = e$，成立。
+
+          类似地，对于$e=e_1 - e_2, e = e_1 * e_2$命题都成立。
+
+        综上，对任意表达式做常量折叠变换都保持语义等价。
+      \end{proof}
+
+    \subsection{能否用于编译优化}
+
+      可以。由于对任意表达式做常量折叠变换都不会改变其语义值，从而能够达到简化AST的效果。
+
+
+\end{document}
