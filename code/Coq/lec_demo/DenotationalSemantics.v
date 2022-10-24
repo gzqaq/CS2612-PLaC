@@ -18,6 +18,12 @@ Local Open Scope bool.
 Local Open Scope string.
 Local Open Scope Z.
 
+Ltac int64_lia :=
+  change Int64.min_signed with (-9223372036854775808) in *;
+  change Int64.max_signed with 9223372036854775807 in *;
+  lia.
+
+
 (** 我们一般将描述程序行为的理论成为程序语义理论。在之前我们实现解释器的过程中，
     实际已经使用了两种程序语义理论。其一是在描述程序表达式的行为时，我们在简单解
     释器中对表达式的树结构进行递归，从而求出了其在特定程序状态下的值。其二是在描
@@ -381,6 +387,8 @@ End Lang2.
 
 
 
+
+
 (** 在Coq中可以使用_[option]_类型描述相关概念。*)
 
 
@@ -408,7 +416,10 @@ Import Lang1 Lang2.
 
 Fixpoint eeval (e : expr) (st : prog_state) : option int64 :=
   match e with
-  | ENum n => Some (Int64.repr n)
+  | ENum n =>
+      if (n <=? Int64.max_signed) && (n >=? Int64.min_signed)
+      then Some (Int64.repr n)
+      else None
   | EVar X => Some (st X)
   | EPlus a1 a2 =>
       match eeval a1 st, eeval a2 st with
@@ -456,15 +467,40 @@ Check 1 <= 2.
     的定义是：_[Z.leb 1 2]_。而_[1 <= 2]_则是关于两数大小关系的命题，这一符号对
     应的定义是：_[Z.le 1 2]_。Coq标准库中也证明了两者的联系。*)
 
-Check Zle_imp_le_bool.
+Check Z.leb_le.
 
-(** 这个定理说的是：_[forall n m : Z, n <= m -> (n <=? m) = true]_。当然，Coq标
+(** 这个定理说的是：_[forall n m : Z, (n <=? m) = true <-> n <= m]_。当然，Coq标
     准库中还有很多类似的有用的性质，这里就不再一一罗列了，相关信息也可以通过
     _[Search Z.leb]_或_[Search Z.le]_等方法查找。*)
 
 (** 最后，在Coq中，可以用_[&&]_表示布尔值的合取（Coq定义是_[andb]_）并且使用
     _[if]_，_[then]_，_[else]_针对布尔表达式求值为真以及为假的情况分别采取不同的
     求值方法。将这些定义组合在一起，就得到了上面的_[eeval]_定义。*)
+
+(** 我们可以在Coq中证明一些关于表达式指称语义的基本性质。*)
+
+Example eeval_fact0: forall st,
+  st "x" = Int64.repr 0 ->
+  eeval [["x" + 1]] st = Some (Int64.repr 1).
+Proof.
+  intros.
+  simpl.
+  rewrite H.
+  Check Int64.signed_repr.
+  rewrite ! Int64.signed_repr by int64_lia.
+  assert (0 + 1 <= Int64.max_signed).
+  {
+    int64_lia.
+  }
+  assert (Int64.min_signed <= 0 + 1) by int64_lia.
+  apply Z.leb_le in H0.
+  apply Z.geb_le in H1.
+  rewrite H0, H1.
+  simpl.
+  Check Int64.add_signed.
+  rewrite Int64.add_signed.
+  reflexivity.
+Qed.
 
 End Lang3.
 
@@ -515,7 +551,9 @@ Proof. intros. reflexivity. Qed.
 Fixpoint eeval (e : expr) (st : prog_state) : option int64 :=
   match e with
   | ENum n =>
-      Some (Int64.repr n)
+      if (n <=? Int64.max_signed) && (n >=? Int64.min_signed)
+      then Some (Int64.repr n)
+      else None
   | EVar X =>
       Some (st X)
   | EPlus a1 a2 =>
@@ -543,7 +581,9 @@ Import Lang1 Lang2.
 Definition const_denote
            (n: Z)
            (s: prog_state): option int64 :=
-  Some (Int64.repr n).
+  if (n <=? Int64.max_signed) && (n >=? Int64.min_signed)
+  then Some (Int64.repr n)
+  else None.
 
 Definition var_denote
            (X: var_name)
@@ -597,6 +637,10 @@ End Lang3H2.
 Definition doit3times {X:Type} (f:X->X) (n:X) : X :=
   f (f (f n)).
 
+Check @doit3times.
+Check @doit3times Z.
+Check @doit3times nat.
+
 (** 这里，_[f]_这个参数本身也是一个函数（从_[X]_到_[X]_的函数）而_[doit3times]_
     则把_[f]_在_[n]_上作用了3次。*)
 
@@ -611,6 +655,30 @@ Proof. reflexivity. Qed.
 
 Example fact_doit3times_anon2:
   doit3times (fun x => x * x) 2 = 256.
+Proof. reflexivity. Qed.
+
+Example fact_doit3times_doit3times:
+  doit3times doit3times minustwo 9 = -45.
+Proof. reflexivity. Qed.
+
+Example fact_di3t_1:
+  doit3times (fun x => -x) 5 = -5.
+Proof. reflexivity. Qed.
+
+Example fact_di3t_2:
+  doit3times (fun f x y => f y x) (fun x y => x - y) 1 2 = 1.
+Proof. reflexivity. Qed.
+
+Definition Func_add := fun f g (x : Z) => f x + g x.
+
+Example fact_di3t_3:
+  doit3times (Func_add minustwo) (fun x => x * x) 100 = (fun x => x * x + 3 * x - 6) 100.
+Proof. reflexivity. Qed.
+
+(* Func_add minustwo = fun f => (f(x) => f(x) + x - 2) *)
+
+Example fact_di3t_4:
+  doit3times ( ( fun x y => y * y - x * y + x * x ) 1 ) 1 = 1.
 Proof. reflexivity. Qed.
 
 (** 这里_[fun x => x - 2]_与之前定义的_[minustwo]_是相同的，而_[fun x => x * x]_
@@ -634,7 +702,7 @@ Proof. reflexivity. Qed.
 
 (** ** 方案四 *)
 
-(** 上面我们讨论了将表达式语义定义为程序状态到$\mathbb{Z}_{2^64} \cup \{ \epsilon \}$
+(** 上面我们讨论了将表达式语义定义为程序状态到$\mathbb{Z}_{2^{64}} \cup \{ \epsilon \}$
     的函数这一方案。下面我们探讨另一种描述程序运行出错或未定义行为的方案，即将表
     达式的语义定义为程序状态与64位整数之间的二元关系。*)
 
@@ -695,5 +763,33 @@ Fixpoint eeval (e : expr) : prog_state -> int64 -> Prop :=
   end.
 
 End Lang4.
+
+
+
+(** ** 方案五 *)
+
+(** 到目前为止，我们考虑了极简的只包含加减乘算术运算的表达式的指称语义。其实，基
+    于上面的方案，我们很容易就可以定义大小比较、布尔运算以及地址取值的语义。*)
+
+
+
+(** 至此为止，我们介绍的语义理论，已经可以描述While+DB语言中绝大多数表达式语法元
+    素的语义。这也基本覆盖了传统指称语义理论中表达式语义的部分。对于表达式包含内
+    置函数调用的情况，结束今天的学习后，各位同学一定也能够自己写出。
+
+    总结一下，到目前为止，我们介绍的程序表达式指称语义理论基本遵从下面模式：*)
+
+(** 定义程序状态集合； *)
+(** 定义表达式指称集合； *)
+(** 递归定义各个表达式的具体语义。 *)
+
+(** * 程序语句的指称语义 *)
+
+(** 当我们要描述程序语句的语义时，我们会发现，程序语句与我们先前考虑的程序表达式
+    相比，有一个根本的不同：程序语句会修改程序状态。下面我们首先考虑考虑赋值语
+    句、顺序执行语句与if条件分支语句的语义。为了方便起见，我们暂时不考虑
+    dereference，也不考虑变量声明，假设所有变量不需要声明就可以使用。*)
+
+
 
 
