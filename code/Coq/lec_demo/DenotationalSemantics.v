@@ -331,14 +331,15 @@ Check Int64.and.
 (** Coq返回：_[Int64.and : int64 -> int64 -> int64]_ *)
 
 
-(** 在Coq中，用户可以用_[Search]_指令搜索已经证明过的结果。例如，下面指令可以搜
-    索所有关于_[Int64.add]_的性质。*)
+(** 在Coq中，用户可以用_[Search]_指令搜索已经证明过的结果。例如，使用
 
-Search Int64.add.
+      _[Search Int64.add.]_
 
-(** 除此之外，_[Search]_指令允许在搜索中对包含命题的形式做更细化的描述。例如：*)
+    指令可以搜索所有关于_[Int64.add]_的性质。除此之外，_[Search]_指令允许在搜索
+    中对包含命题的形式做更细化的描述。例如：
 
-Search (Int64.add _ _ = Int64.add _ _).
+      _[Search (Int64.add _ _ = Int64.add _ _).]_
+*)
 
 
 
@@ -486,7 +487,6 @@ Proof.
   intros.
   simpl.
   rewrite H.
-  Check Int64.signed_repr.
   rewrite ! Int64.signed_repr by int64_lia.
   assert (0 + 1 <= Int64.max_signed).
   {
@@ -497,7 +497,6 @@ Proof.
   apply Z.geb_le in H1.
   rewrite H0, H1.
   simpl.
-  Check Int64.add_signed.
   rewrite Int64.add_signed.
   reflexivity.
 Qed.
@@ -702,9 +701,10 @@ Proof. reflexivity. Qed.
 
 (** ** 方案四 *)
 
-(** 上面我们讨论了将表达式语义定义为程序状态到$\mathbb{Z}_{2^{64}} \cup \{ \epsilon \}$
-    的函数这一方案。下面我们探讨另一种描述程序运行出错或未定义行为的方案，即将表
-    达式的语义定义为程序状态与64位整数之间的二元关系。*)
+
+(** 上面我们讨论了将表达式语义定义为程序状态到_[option int64]_的函数这一方案。下
+    面我们探讨另一种描述程序运行出错或未定义行为的方案，即将表达式的语义定义为程
+    序状态与_[int64]_之间的二元关系。*)
 
 
 
@@ -721,7 +721,9 @@ Definition const_denote
            (z: Z)
            (s: prog_state)
            (n: int64): Prop :=
-  n = Int64.repr z.
+  n = Int64.repr z /\
+  z <= Int64.max_signed /\
+  z >= Int64.min_signed.
 
 Definition var_denote
            (X: var_name)
@@ -762,6 +764,10 @@ Fixpoint eeval (e : expr) : prog_state -> int64 -> Prop :=
       arith_denote Z.mul Int64.mul (eeval a1) (eeval a2)
   end.
 
+
+
+
+
 End Lang4.
 
 
@@ -773,22 +779,344 @@ End Lang4.
 
 
 
-(** 至此为止，我们介绍的语义理论，已经可以描述While+DB语言中绝大多数表达式语法元
-    素的语义。这也基本覆盖了传统指称语义理论中表达式语义的部分。对于表达式包含内
-    置函数调用的情况，结束今天的学习后，各位同学一定也能够自己写出。
+Module WhileD_Expr.
 
-    总结一下，到目前为止，我们介绍的程序表达式指称语义理论基本遵从下面模式：*)
+Definition var_name: Type := string.
 
-(** 定义程序状态集合； *)
-(** 定义表达式指称集合； *)
-(** 递归定义各个表达式的具体语义。 *)
+(** 再定义二元运算符和一元运算符。*)
+
+Inductive binop : Type :=
+  | OOr | OAnd
+  | OLt | OLe | OGt | OGe | OEq | ONe
+  | OPlus | OMinus | OMul | ODiv | OMod.
+
+Inductive unop : Type :=
+  | ONot | ONeg.
+
+(** 下面是表达式的抽象语法树。*)
+
+Inductive expr : Type :=
+  | ENum (n: Z): expr
+  | EVar (x: var_name): expr
+  | EBinop (op: binop) (e1 e2: expr): expr
+  | EUnop (op: unop) (e: expr): expr
+  | EDeref (e: expr): expr.
+
+(** 下面定义程序状态。在C程序中，每个变量也有其地址，程序中可以用取地址操作获取
+    变量的地址。然而，在While+DB语言中，没有取地址操作，我们不妨将程序状态定义为
+    这样的二元组：变量的值与地址上的值。这在Coq中可以用_[Record]_来定义。*)
+
+Record prog_state: Type := {
+  vars: var_name -> int64;
+  mem: int64 -> option int64;
+}.
+
+(** 值得一提的是，几乎在一切程序语言中，都不能保证任选一个地址进行读写的安全性。
+    因此，我们也在程序状态中规定，一些地址有读写权限（对应_[Some]_），一些地址没
+    有读写权限（对应_[None]_）。
+
+    Coq中_[Record]_定义的类型可以这样使用：*)
+
+Example record_ex: forall V M st,
+  st = {| vars := V; mem := M; |} ->
+  st.(vars) = V /\ st.(mem) = M.
+Proof.
+  intros.
+  rewrite H.
+  simpl.
+  split; reflexivity.
+Qed.
+
+(** 我们可以看到，要用_[Record]_的各个域合并得到整体，可以用带竖线的大括号。要从
+    _[Record]_的整体得到它的一个域，应当在点号后写圆括号与域名。*)
+
+(** 下面定义指称语义。常量的语义定义与原先相同。*)
+
+Definition const_denote
+           (z: Z)
+           (s: prog_state)
+           (n: int64): Prop :=
+  n = Int64.repr z /\
+  z <= Int64.max_signed /\
+  z >= Int64.min_signed.
+
+(** 变量的语义定义应当用程序状态中变量的部分定义。*)
+
+Definition var_denote
+           (X: var_name)
+           (s: prog_state)
+           (n: int64) :=
+  n = s.(vars) X.
+
+(** 加减乘的语义定义与原先定义相同。*)
+
+Definition arith_denote1
+             (Zfun: Z -> Z -> Z)
+             (int64fun: int64 -> int64 -> int64)
+             (D1 D2: prog_state -> int64 -> Prop)
+             (s: prog_state)
+             (n: int64): Prop :=
+  exists n1 n2,
+    D1 s n1 /\ D2 s n2 /\
+    n = int64fun n1 n2 /\
+    Zfun (Int64.signed n1) (Int64.signed n2)
+      <= Int64.max_signed /\
+    Zfun (Int64.signed n1) (Int64.signed n2)
+      >= Int64.min_signed.
+
+(** 下面是除法和取余的定义。根据C标准（C11标准6.5.5章节第6段落），只有除法运算结
+    果不越界的情况下，才能安全计算余数。*)
+
+Definition arith_denote2
+             (int64fun: int64 -> int64 -> int64)
+             (D1 D2: prog_state -> int64 -> Prop)
+             (s: prog_state)
+             (n: int64): Prop :=
+  exists n1 n2,
+    D1 s n1 /\ D2 s n2 /\
+    n = int64fun n1 n2 /\
+    Int64.signed n2 <> 0 /\
+    (Int64.signed n1 <> Int64.min_signed \/
+     Int64.signed n2 <> 1).
+
+(** 下面是整数大小比较的定义，其中将直接使用CompCert中现有的定义。这里，
+    _[comparison]_是CompCert中定义六种大小比较运算，_[Int64.cmp]_则定义了大小的
+    结果（结果类型为_[bool]_）。*)
+
+Print comparison.
+
+Check Int64.cmp.
+
+Definition cmp_denote
+             (c: comparison)
+             (D1 D2: prog_state -> int64 -> Prop)
+             (s: prog_state)
+             (n: int64): Prop :=
+  exists n1 n2,
+    D1 s n1 /\ D2 s n2 /\
+    n = if Int64.cmp c n1 n2 then Int64.repr 1 else Int64.repr 0.
+
+(** 下面是二元布尔运算的语义，请特别注意表述其中的短路求值行为。*)
+
+Definition and_denote
+             (D1 D2: prog_state -> int64 -> Prop)
+             (s: prog_state)
+             (n: int64): Prop :=
+  (D1 s (Int64.repr 0) /\ n = Int64.repr 0) \/
+  (exists n1,
+     D1 s n1 /\
+     D2 s (Int64.repr 0) /\
+     Int64.signed n1 <> 0 /\
+     n = Int64.repr 0) \/
+  (exists n1 n2,
+     D1 s n1 /\ D2 s n2 /\
+     Int64.signed n1 <> 0 /\
+     Int64.signed n2 <> 0 /\
+     n = Int64.repr 1).
+
+Definition or_denote
+             (D1 D2: prog_state -> int64 -> Prop)
+             (s: prog_state)
+             (n: int64): Prop :=
+  (exists n1,
+     D1 s n1 /\ Int64.signed n1 <> 0) \/
+  (exists n2,
+     D1 s (Int64.repr 0) /\
+     D2 s n2 /\
+     Int64.signed n2 <> 0 /\
+     n = Int64.repr 1) \/
+  (D1 s (Int64.repr 0) /\
+   D2 s (Int64.repr 0) /\
+   n = Int64.repr 0).
+
+(** 最终我们可以将所有二元运算的语义汇总起来：*)
+
+Definition binop_denote
+             (op: binop)
+             (D1 D2: prog_state -> int64 -> Prop):
+  prog_state -> int64 -> Prop :=
+  match op with
+  | OOr => or_denote D1 D2
+  | OAnd => and_denote D1 D2
+  | OLt => cmp_denote Clt D1 D2
+  | OLe => cmp_denote Cle D1 D2
+  | OGt => cmp_denote Cgt D1 D2
+  | OGe => cmp_denote Cge D1 D2
+  | OEq => cmp_denote Ceq D1 D2
+  | ONe => cmp_denote Cne D1 D2
+  | OPlus => arith_denote1 Z.add Int64.add D1 D2
+  | OMinus => arith_denote1 Z.sub Int64.sub D1 D2
+  | OMul => arith_denote1 Z.mul Int64.mul D1 D2
+  | ODiv => arith_denote2 Int64.divs D1 D2
+  | OMod => arith_denote2 Int64.mods D1 D2
+  end.
+
+(** 下面定义一元运算的语义。*)
+
+Definition neg_denote
+             (D: prog_state -> int64 -> Prop)
+             (s: prog_state)
+             (n: int64): Prop :=
+  exists n0,
+    D s n0 /\
+    n = Int64.neg n0 /\
+    Int64.signed n0 <> Int64.min_signed.
+
+Definition not_denote
+             (D: prog_state -> int64 -> Prop)
+             (s: prog_state)
+             (n: int64): Prop :=
+  (exists n0,
+     D s n0 /\
+     Int64.signed n <> 0 /\
+     n = Int64.repr 0) \/
+  (D s (Int64.repr 0) /\ n = Int64.repr 1).
+
+Definition unop_denote
+             (op: unop)
+             (D: prog_state -> int64 -> Prop):
+  prog_state -> int64 -> Prop :=
+  match op with
+  | ONeg => neg_denote D
+  | ONot => not_denote D
+  end.
+
+(** 最后定义地址取值的语义：*)
+
+Definition deref_denote
+             (D: prog_state -> int64 -> Prop)
+             (s: prog_state)
+             (n: int64): Prop :=
+  exists p, D s p /\ s.(mem) p = Some n.
+
+(** 最终，我们可以定义所有表达式的指称语义：*)
+
+Fixpoint eeval (e : expr): prog_state -> int64 -> Prop :=
+  match e with
+  | ENum n => const_denote n
+  | EVar X => var_denote X
+  | EBinop op e1 e2 => binop_denote op (eeval e1) (eeval e2)
+  | EUnop op e0 => unop_denote op (eeval e0)
+  | EDeref e0 => deref_denote (eeval e0)
+  end.
+
+End WhileD_Expr.
+
+
 
 (** * 程序语句的指称语义 *)
 
-(** 当我们要描述程序语句的语义时，我们会发现，程序语句与我们先前考虑的程序表达式
-    相比，有一个根本的不同：程序语句会修改程序状态。下面我们首先考虑考虑赋值语
-    句、顺序执行语句与if条件分支语句的语义。为了方便起见，我们暂时不考虑
-    dereference，也不考虑变量声明，假设所有变量不需要声明就可以使用。*)
+
+
+
+
+Module Lang5.
+
+Import WhileD_Expr.
+
+Inductive com : Type :=
+  | CAss (e1 e2: expr): com
+  | CSeq (c1 c2: com): com
+  | CIf (e: expr) (c1 c2: com): com.
+
+Definition ass_var_denote
+             (X: var_name)
+             (D: prog_state -> int64 -> Prop)
+             (st1 st2: prog_state): Prop :=
+  exists n,
+    D st1 n /\
+    st2.(vars) X = n /\
+    (forall Y, X <> Y -> st1.(vars) Y = st2.(vars) Y) /\
+    (forall p, st1.(mem) p = st2.(mem) p).
+
+Definition ass_deref_denote
+             (D1 D2: prog_state -> int64 -> Prop)
+             (st1 st2: prog_state): Prop :=
+  exists p n,
+    D1 st1 p /\
+    D2 st1 n /\
+    st1.(mem) p <> None /\
+    st2.(mem) p = Some n /\
+    (forall X, st1.(vars) X = st2.(vars) X) /\
+    (forall q, p <> q -> st1.(mem) q = st2.(mem) q).
+
+End Lang5.
+
+(** ** 二元关系的运算 *)
+
+(** 再要进一步定义程序语句的指称语义，就要定义复合语句的指称语义。即，要用子程序
+    与子语句的语义定义整体程序与整体语句的语义。为此，我们先回顾一下关于二元关系
+    的重要概念。*)
+
+Module BinRel.
+
+(** 相等关系（identity relation）： *)
+
+Definition id {A: Type}: A -> A -> Prop := fun a b => a = b.
+
+(** 二元关系的连接： *)
+
+Definition concat
+             {A B C: Type}
+             (r1: A -> B -> Prop)
+             (r2: B -> C -> Prop): A -> C -> Prop :=
+  fun a c => exists b, r1 a b /\ r2 b c.
+
+(** 二元关系与一元关系的连接： *)
+
+Definition dia {A B: Type} (X: A -> B -> Prop) (Y: B -> Prop): A -> Prop :=
+  fun a => exists b, X a b /\ Y b.
+
+End BinRel.
+
+Notation "X ∘ Y" := (BinRel.concat X Y)
+  (right associativity, at level 60): sets_scope.
+Local Open Scope sets_scope.
+
+(** 下面，我们可以证明他们的一些基本性质。 *)
+
+Lemma BinRel_concat_assoc:
+  forall
+    {A B C D}
+    (R1: A -> B -> Prop)
+    (R2: B -> C -> Prop)
+    (R3: C -> D -> Prop),
+  R1 ∘ (R2 ∘ R3) == (R1 ∘ R2) ∘ R3.
+Proof.
+  intros.
+  sets_unfold; unfold BinRel.concat.
+  intros a d.
+  split; intros.
+  - destruct H as [b [? [c [? ?]]]].
+    exists c.
+    split.
+    -- exists b.
+       tauto.
+    -- tauto.
+  - destruct H as [c [[b [? ?]] ?]].
+    exists b.
+    split.
+    -- tauto.
+    -- exists c.
+       tauto.
+
+Lemma BinRel_concat_union_distr_r:
+  forall
+    {A B C}
+    (R1 R2: A -> B -> Prop)
+    (R3: B -> C -> Prop),
+  (R1 ∪ R2) ∘ R3 == (R1 ∘ R3) ∪ (R2 ∘ R3).
+Proof.
+Admitted. (** 留作作业 *)
+
+Lemma BinRel_concat_union_distr_l:
+  forall
+    {A B C}
+    (R1: A -> B -> Prop)
+    (R2 R3: B -> C -> Prop),
+  R1 ∘ (R2 ∪ R3) == (R1 ∘ R2) ∪ (R1 ∘ R3).
+Proof.
+Admitted. (** 留作作业 *)
 
 
 
