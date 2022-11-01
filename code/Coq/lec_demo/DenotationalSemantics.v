@@ -379,8 +379,8 @@ End Lang2.
 (** ** 方案三 *)
 
 (** 在讲解并实现简单解释器之前，我们曾经约定while语言的算术运算语义基本遵循C标准
-    的规定。特别的，有符号64位整数的运算越界应当被视为程序错误。然而，这一点并未
-    在上面定义中得到体现。*)
+    的规定。特别的，有符号64位整数的运算越界应当被视为程序错误（C11标准6.5章节第
+    5段落）。然而，这一点并未在上面定义中得到体现。*)
 
 (** 为了解决这一问题，我们需要能够在定义中表达『程序表达式求值出错』这一概念。这
     在数学上有两种常见方案。其一是将_[eeval]_的求值结果由64位整数集合改为64位整
@@ -877,7 +877,10 @@ Definition arith_denote2
     n = int64fun n1 n2 /\
     Int64.signed n2 <> 0 /\
     (Int64.signed n1 <> Int64.min_signed \/
-     Int64.signed n2 <> 1).
+     Int64.signed n2 <> -1).
+
+(* Int64.divs Int64.mods : signed *)
+(* Int64.divu Int64.modu : unsigned *)
 
 (** 下面是整数大小比较的定义，其中将直接使用CompCert中现有的定义。这里，
     _[comparison]_是CompCert中定义六种大小比较运算，_[Int64.cmp]_则定义了大小的
@@ -919,7 +922,9 @@ Definition or_denote
              (s: prog_state)
              (n: int64): Prop :=
   (exists n1,
-     D1 s n1 /\ Int64.signed n1 <> 0) \/
+     D1 s n1 /\
+     Int64.signed n1 <> 0 /\
+     n = Int64.repr 1) \/
   (exists n2,
      D1 s (Int64.repr 0) /\
      D2 s n2 /\
@@ -1014,12 +1019,16 @@ Module Lang5.
 
 Import WhileD_Expr.
 
+(** 下面程序语句语法树的定义只考虑了赋值语句、顺序执行与条件分支语句。*)
+
 Inductive com : Type :=
   | CAss (e1 e2: expr): com
   | CSeq (c1 c2: com): com
   | CIf (e: expr) (c1 c2: com): com.
 
-Definition ass_var_denote
+(** 先定义对变量进行赋值的程序语义。*)
+
+Definition asgn_var_denote
              (X: var_name)
              (D: prog_state -> int64 -> Prop)
              (st1 st2: prog_state): Prop :=
@@ -1029,7 +1038,9 @@ Definition ass_var_denote
     (forall Y, X <> Y -> st1.(vars) Y = st2.(vars) Y) /\
     (forall p, st1.(mem) p = st2.(mem) p).
 
-Definition ass_deref_denote
+(** 再定义对地址上存储的值进行赋值的程序语义。*)
+
+Definition asgn_deref_denote
              (D1 D2: prog_state -> int64 -> Prop)
              (st1 st2: prog_state): Prop :=
   exists p n,
@@ -1039,6 +1050,23 @@ Definition ass_deref_denote
     st2.(mem) p = Some n /\
     (forall X, st1.(vars) X = st2.(vars) X) /\
     (forall q, p <> q -> st1.(mem) q = st2.(mem) q).
+
+(** 上述两条定义在程序语句语义的整体定义中是这样使用的（此处先不填入顺序执行语句
+    与条件分支语句的语义，相应位置用_[TO_BE_FILLED_LATER]_表示）。*)
+
+Definition TO_BE_FILLED_LATER: prog_state -> prog_state -> Prop :=
+  fun _ _ => False.
+
+Definition ceval_demo (c: com): prog_state -> prog_state -> Prop :=
+  match c with
+  | CAss e1 e2 =>
+    match e1 with
+    | EVar X => asgn_var_denote X (eeval e2)
+    | EDeref e0 => asgn_deref_denote (eeval e0) (eeval e2)
+    | _ => fun _ _ => False
+    end
+  | _ => TO_BE_FILLED_LATER
+  end.
 
 End Lang5.
 
@@ -1053,6 +1081,8 @@ Module BinRel.
 (** 相等关系（identity relation）： *)
 
 Definition id {A: Type}: A -> A -> Prop := fun a b => a = b.
+
+(* id = { (a, a) | a in A } *)
 
 (** 二元关系的连接： *)
 
@@ -1073,7 +1103,8 @@ Notation "X ∘ Y" := (BinRel.concat X Y)
   (right associativity, at level 60): sets_scope.
 Local Open Scope sets_scope.
 
-(** 下面，我们可以证明他们的一些基本性质。 *)
+(** 下面，我们可以证明他们的一些基本性质。引理_[BinRel_concat_assoc]_是二元关系
+    连接运算的结合律。 *)
 
 Lemma BinRel_concat_assoc:
   forall
@@ -1083,22 +1114,54 @@ Lemma BinRel_concat_assoc:
     (R3: C -> D -> Prop),
   R1 ∘ (R2 ∘ R3) == (R1 ∘ R2) ∘ R3.
 Proof.
-  intros.
-  sets_unfold; unfold BinRel.concat.
-  intros a d.
-  split; intros.
+  intros A B C D R1 R2 R3.
+  sets_unfold. unfold BinRel.concat.
+  intros a d. split; intros.
   - destruct H as [b [? [c [? ?]]]].
     exists c.
     split.
-    -- exists b.
-       tauto.
-    -- tauto.
+    + exists b. tauto.
+    + tauto.
   - destruct H as [c [[b [? ?]] ?]].
     exists b.
     split.
-    -- tauto.
-    -- exists c.
-       tauto.
+    + tauto.
+    + exists c. tauto.
+Qed.
+
+(** 下面两条性质证明了_[BinRel.id]_是二元关系连接运算的单位元。*)
+
+Lemma BinRel_concat_id_l:
+  forall {A B} (R: A -> B -> Prop),
+    BinRel.id ∘ R == R.
+Proof.
+Admitted. (* 留作习题 *)
+
+Lemma BinRel_concat_id_r:
+  forall {A B} (R: A -> B -> Prop),
+    R ∘ BinRel.id == R.
+Proof.
+Admitted. (* 留作习题 *)
+
+(** 下面两条性质证明了空集是二元关系连接运算的零元。请注意：在数学中，只要一个集
+    合中不包含任何元素，那么这个集合就是空集。然而，在Coq中，任何一个数学对象都
+    应当有类型。因此，下面定理中，我们用_[∅: A -> B -> Prop]_以及
+    _[∅: B -> C -> Prop]_表示在考虑_[A]_到_[B]_的二元关系时以及在考虑_[B]_到
+    _[C]_的二元关系时的空集。*)
+
+Lemma BinRel_concat_empty_l:
+  forall {A B C} (R: B -> C -> Prop),
+    (∅: A -> B -> Prop) ∘ R == ∅.
+Proof.
+Admitted. (* 留作习题 *)
+
+Lemma BinRel_concat_empty_r:
+  forall {A B C} (R: A -> B -> Prop),
+    R ∘ (∅: B -> C -> Prop) == ∅.
+Proof.
+Admitted. (* 留作习题 *)
+
+(** 下面四条性质是二元关系连接运算对并集运算的分配律。*)
 
 Lemma BinRel_concat_union_distr_r:
   forall
@@ -1107,7 +1170,7 @@ Lemma BinRel_concat_union_distr_r:
     (R3: B -> C -> Prop),
   (R1 ∪ R2) ∘ R3 == (R1 ∘ R3) ∪ (R2 ∘ R3).
 Proof.
-Admitted. (** 留作作业 *)
+Admitted. (* 留作习题 *)
 
 Lemma BinRel_concat_union_distr_l:
   forall
@@ -1116,7 +1179,83 @@ Lemma BinRel_concat_union_distr_l:
     (R2 R3: B -> C -> Prop),
   R1 ∘ (R2 ∪ R3) == (R1 ∘ R2) ∪ (R1 ∘ R3).
 Proof.
-Admitted. (** 留作作业 *)
+Admitted. (* 留作习题 *)
+
+Lemma BinRel_concat_omega_union_distr_r:
+  forall
+    {A B C}
+    (R1: nat -> A -> B -> Prop)
+    (R2: B -> C -> Prop),
+  (⋃ R1) ∘ R2 == ⋃ (fun n => R1 n ∘ R2).
+Proof.
+Admitted. (* 留作习题 *)
+
+Lemma BinRel_concat_omega_union_distr_l:
+  forall
+    {A B C}
+    (R1: A -> B -> Prop)
+    (R2: nat -> B -> C -> Prop),
+  R1 ∘ (⋃ R2) == ⋃ (fun n => R1 ∘ R2 n).
+Proof.
+Admitted. (* 留作习题 *)
+
+
+
+
+(** 下面依托上述二元关系间的运算，在Coq中定义顺序执行语句与条件分支语句的行为。*)
+
+Module Lang6.
+
+Import WhileD_Expr Lang5.
+
+Definition seq_denote
+             (D1 D2: prog_state -> prog_state -> Prop):
+  prog_state -> prog_state -> Prop :=
+  D1 ∘ D2.
+
+Definition test0
+             (D: prog_state -> int64 -> Prop)
+             (st1 st2: prog_state):  Prop :=
+  st1 = st2 /\ D st1 (Int64.repr 0).
+
+Definition test1
+             (D: prog_state -> int64 -> Prop)
+             (st1 st2: prog_state):  Prop :=
+  exists n, st1 = st2 /\ D st1 n /\ Int64.unsigned n <> 0.
+
+Definition if_denote
+             (D0: prog_state -> int64 -> Prop)
+             (D1 D2: prog_state -> prog_state -> Prop):
+  prog_state -> prog_state -> Prop :=
+  test1(D0) ∘ D1 ∪ test0(D0) ∘ D2.
+
+(** 这样，我们就可以定义只包含赋值语句、顺序执行语句与条件分支语句程序语言的指称
+    语义。*)
+
+Fixpoint ceval (c: com): prog_state -> prog_state -> Prop :=
+  match c with
+  | CAss e1 e2 =>
+    match e1 with
+    | EVar X => asgn_var_denote X (eeval e2)
+    | EDeref e0 => asgn_deref_denote (eeval e0) (eeval e2)
+    | _ => fun _ _ => False
+    end
+  | CSeq c1 c2 => seq_denote (ceval c1) (ceval c2)
+  | CIf e c1 c2 => if_denote (eeval e) (ceval c1) (ceval c2)
+  end.
+
+End Lang6.
+
+
+
+
+
+
+
+
+
+
+
 
 
 
