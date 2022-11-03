@@ -1,0 +1,219 @@
+\documentclass[12pt]{article}
+
+\usepackage{geometry}
+\geometry{a4paper}
+
+\usepackage{graphicx}
+\usepackage{caption}
+
+\usepackage{ctex}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{stmaryrd}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+
+\lstset{
+  frame=single,
+  framerule=0pt,
+  backgroundcolor=\color{gray!15},
+  xleftmargin=2em,
+}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Tt}{\textrm{test1}}
+\newcommand{\ttt}{\textrm{test0}}
+\newcommand{\zz}{\mathbb{Z}_{2^{64}}}
+\newcommand{\nn}{\{(n,m) | n,m \in \mathbb{N}, n \leq m\}}
+\newcommand{\nw}{\{(n,\omega) | n \in \mathbb{N}\} \cup \{(n,\omega+1) | n \in \mathbb{N}\}}
+\newcommand{\ww}{\{(\omega,\omega),(\omega,\omega+1),(\omega+1,\omega+1)\}}
+\newcommand{\suc}{\textrm{succ}}
+\newcommand{\lub}{\textrm{lub}}
+
+
+\title{Assignment 1028}
+\author{Ziqin Gong $\quad$ 520030910216}
+\date{}
+
+\begin{document}
+  \maketitle
+
+  \section*{1}
+
+    \begin{gather*}
+      \{(s,s) | (s,0) \in \llbracket x>0 \rrbracket\} \cup \\
+      \{(s_0,s_1) | (s_0,n) \in \llbracket x>0 \rrbracket, n\in\zz\setminus\{0\},(s_1,0) \in \llbracket x>0 \rrbracket, \forall y\neq x,s_0(y)=s_1(y)\}
+    \end{gather*}
+
+  \section*{2}
+
+  \subsection*{(1)}
+
+    \begin{gather*}
+      \{(s,s) | (s,0) \in \llbracket E \rrbracket\} \cup \\
+      \{(s_0,s_1) | (s_0,n) \in \llbracket x>0 \rrbracket, n\in\zz\setminus\{0\}, (s_1,0)\in\llbracket E \rrbracket, \forall y\neq x,s_0(y)=s_1(y)\}
+    \end{gather*}
+
+  \subsection*{(2)}
+
+    \begin{gather*}
+      \llbracket C \rrbracket.\textrm{fin} \cup \{(s,s) | (s,0)\in\llbracket x\geq0 \rrbracket\}
+    \end{gather*}
+
+  \section*{3}
+
+    \begin{proof}
+      首先证明$(\mathbb{N},=)$是偏序集。
+
+      (1) 自反性：由整数相等的自反性可得，$\forall n \in \mathbb{N}, n=n$。
+
+      (2) 传递性：由整数相等的传递性可得，$\forall a,b,c \in \mathbb{N}, \textrm{若 }a=b,b=c, \textrm{则}a=c$。
+
+      (3) 反对称性：易得$\forall a,b \in \mathbb{N}, \textrm{若} a=b \textrm{且} b=a, a=b$
+
+      因此，$(\mathbb{N},=)$是偏序集。下面证明是完备的。
+
+      任取$\mathbb{N}$中的一条链$S$，即$\forall a,b \in S, a=b \textrm{ or } b=a$，即$S$中所有元素都相等，那么其上确界也就是该元素的值。
+      因此$\mathbb{N}$中的每一条链都有其上确界，故$(\mathbb{N},=)$是完备偏序集。
+    \end{proof}
+
+  \section*{4}
+
+    \begin{proof}
+      首先证明$(A,\subseteq)$是偏序集。
+
+      (1) 自反性：由集合包含的自反性可得，$\forall S \in A, S \subseteq S$。
+
+      (2) 传递性：对任意$S_1,S_2,S_3 \in A$，若$S_1 \subseteq S_2, S_2 \subseteq S_3$，则由集合包含的传递性可得，$S_1 \subseteq S_2$。
+
+      (3) 反对称性：对任意$S_1,S_2 \in A$，若$S_1 \subseteq S_2, S_2 \subseteq S_1$，则由集合包含的反对称性可得，$S_1 = S_2$。
+
+      因此，$(A,\subseteq)$是偏序集。下面证明是完备的。
+
+      任取$A$中的一条链$C$，存在$U=\bigcup_{S_i \in C}S_i$为$C$的上确界。易证其满足$\textrm{lub}(C)$的两条要求。
+      下面证明$U$是自然数集$\mathbb{N}$的有穷子集。
+
+      显然$U$中的所有元素都是自然数，故$U\subseteq\mathbb{N}$。
+      若$U$是无穷集合，由于$S_i$都是有穷集合，故$C$应是无穷集合。
+      又因为$C$中任意两个元素都有包含关系，不妨设$S_1 \subseteq S_2 \subseteq S_3 \subseteq \cdots$，
+      则该无穷长链的最后的元素$S_\infty$必包含无限多的元素，即无穷集合，与$S_i$为有穷集合矛盾。
+      故$U$是有穷集合。综上，$U$是自然数集的有穷子集，即$U \in A$。
+
+      因此，$(A,\subseteq)$是完备偏序集。
+    \end{proof}
+
+  \section*{5}
+
+    \begin{proof}
+      当$m=0$时，$F(n)=n$，显然在$(\mathbb{N},D)$上单调。
+
+      当$m>0$时，任取$a,b \in \mathbb{N}$使得存在$p\in\mathbb{N}\text{ s.t. }b=pa\text{ i.e. }a|b$。
+      则
+      \begin{gather*}
+        F(b) = F(pa) = \textrm{gcd}(pa,m) = \textrm{gcd}(p,m) \cdot \textrm{gcd}(a,m) = qF(a),
+      \end{gather*}
+      其中$q=\textrm{gcd}(p,m)\in\mathbb{N}$，
+      即$F(a) | F(b)$，故$F(n)$在$(\mathbb{N},D)$上单调。
+    \end{proof}
+
+  \section*{6}
+
+    \begin{proof}
+      首先证明单调性。
+      当$m=0$时，$F(n)=0$，显然在$(\mathbb{N},D)$上单调。
+
+      当$m>0$时，若$n=0$，$F(0)=0$。由于任意$n\in\mathbb{N}_+$，$n | 0$且$F(n) | 0$，故满足单调性。
+
+      若$n \in \mathbb{N}_+$，
+      任取$a,b \in \mathbb{N}_+$使得存在$p\in\mathbb{N}_+\text{ s.t. }b=pa\text{ i.e. }a|b$。
+      则
+      \begin{gather*}
+        F(b) = F(pa) = \textrm{lcm}(pa,m) = \frac{p}{\textrm{lcm}(p,m)} \cdot \textrm{lcm}(a,m) = qF(a),
+      \end{gather*}
+      其中$q=p/\textrm{lcm}(p,m)\in\mathbb{N}_+$，
+      即$F(a) | F(b)$，故$F(n)$在$(\mathbb{N},D)$上单调。下面证明连续性。
+
+      任取$\N$上的一条链$C$。当$m=0$时，$F(n)=0,\forall n\in\N$，故显然$F(\lub(C))=\lub(F(C))=0$。
+
+      当$m>0$时，若$C$是有穷集合，不妨设$c_1 | c_2, c_2 | c_3, \cdots, c_{n-1} | c_n$，则$\lub(C)=c_n$。
+      由单调性可得$F(c_i) | F(c_{i+1})$，故$\lub(F(C))=F(c_n)=F(\lub(C))$。
+
+      若$C$是无穷集合，则$F(C)$也是无穷集合，二者都有共同的上确界$0$，而$F(0)=0$，故也满足$\lub(F(C))=F(\lub(C))$。
+
+      综上，$F(n)$是$(\N,D)$的单调连续函数。
+    \end{proof}
+
+  \section*{7}
+
+    \begin{proof}
+
+      \textbf{(1)} 首先证明$(A,\leq_A)$是偏序集。
+
+        I. 自反性：任取$n \in A$，若$n\in\N$，则$(n,n) \in \nn$；若$n=\omega$或$\omega+1$，则$(n,n) \in \ww$。故
+        \begin{gather*}
+          \forall n \in A, (n,n) \in \leq_A。
+        \end{gather*}
+
+        II. 传递性：任取$l,m,n \in A$。若$l,m,n \in \N$，由$\leq$的传递性易得；
+
+        若$(l,m) \in \nn, (m,n) \in \nw$，则$(l,n)\in\nw$；
+
+        若$(l,m)\in\nw,(m,n)\in\ww$，则$(l,n)\in\nw$；
+
+        若$(l,m)\in\ww,(m,n)\in\ww$，则$(l,n)\in\ww$。
+
+        故
+        \begin{gather*}
+          \forall l,m,n \in A,\text{ if }(l,m)\in\leq_A,(m,n)\in\leq_A,\text{ then }(l,n)\in\leq_A。
+        \end{gather*}
+
+        III. 反对称性：任取$n,m\in A$，若$n,m\in\N$，有$n\leq m,m \leq n$，由$\leq$的反对称性得$n=m$；
+
+        若$n\in\N,m\in\{\omega,\omega+1\}$，显然不存在，舍去；
+
+        若$n,m\in\{\omega,\omega+1\}$，则
+        \begin{gather*}
+          (n,m),(m,n)\in\ww\text{ iff }n=m=\omega\text{ or }n=m=\omega+1。
+        \end{gather*}
+
+        故
+        \begin{gather*}
+          \forall n,m \in A,\text{ if }(n,m)\in\leq_A,(m,n)\in\leq_A,\text{ then }n=m。
+        \end{gather*}
+
+        综上，$(A,\leq_A)$是偏序集。下面证明其完备。
+
+        任取$A$中的一条链$C$，若$C\subseteq\N$，显然$\lub(C)=\max C$；
+
+        若$\omega \in C, \omega+1 \notin C$，由$\leq_A$的定义可得$\lub(C)=\omega$；
+
+        若$\omega+1\in C$，由$\leq_A$的定义可得$\lub(C)=\omega+1$。
+
+        故任意一条链都有其上确界。综上，$(A,\leq_A)$是完备偏序集。
+
+      \textbf{(2)} 任取$n,m\in A$满足$(n,m)\in\leq_A$。
+
+        若$n,m\in\N$，由$n\leq m$易得$\suc(n)\leq\suc(m)$；
+
+        若$n\in\N,m\in\{\omega,\omega+1\}$，$\suc(n)\in\N$，$\suc(m)=\omega+1$，显然$(\suc(n),\suc(m))\in\leq_A$；
+
+        若$n,m\in\{\omega,\omega+1\}$，$\suc(n)=\suc(m)=\omega+1$，即$(\suc(n),\suc(m))\in\leq_A$。
+
+        综上，$\suc$是单调函数。下面举反例说明其不连续。
+
+        取$\N$作为$A$上的一条链$C$，则$\suc(C)=\N_+,\lub(C)=\omega$，而$\lub(\N_+)=\omega$，$\suc(\lub(C))=\omega+1$，二者不等。
+        故$\suc$不连续。
+
+      \textbf{(3)} 易得$\bot=0$，则
+        \begin{gather*}
+          \lub(\bot,\suc(\bot),\suc(\suc(\bot)),\cdots)=\lub(0,1,2,\cdots)=\omega。
+        \end{gather*}
+        而$\suc(\omega)=\omega+1\neq\omega$，故$\lub(\bot,\suc(\bot),\suc(\suc(\bot)),\cdots)$不是$\suc$的不动点。
+    \end{proof}
+
+\end{document}
