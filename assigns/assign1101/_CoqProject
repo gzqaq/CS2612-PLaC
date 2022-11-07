@@ -1,0 +1,2 @@
+-Q . PL
+-R ../compcert_lib compcert.lib
