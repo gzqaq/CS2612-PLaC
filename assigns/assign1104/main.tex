@@ -1,0 +1,177 @@
+\documentclass[12pt]{article}
+
+\usepackage{geometry}
+\geometry{a4paper}
+
+\usepackage{graphicx}
+\usepackage{caption}
+
+\usepackage{ctex}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{stmaryrd}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+
+\lstset{
+  frame=single,
+  framerule=0pt,
+  backgroundcolor=\color{gray!15},
+  xleftmargin=2em,
+}
+
+\newcommand{\leqab}{\leq_{A \to B}}
+\newcommand{\leqb}{\leq_B}
+\newcommand{\st}{\textrm{ s.t. }}
+\newcommand{\lub}{\textrm{lub}}
+
+
+\title{Assignment 1104}
+\author{Ziqin Gong $\quad$ 520030910216}
+\date{}
+
+\begin{document}
+  \maketitle
+
+  \section*{1}
+
+    \subsection*{(1)}
+
+      \begin{proof}
+        1) 自反性：任意$a\in A$，由$(B,\leqb)$的自反性可得$f(a)\leqb f(a)$，即$f\leqab f$.
+
+        2) 传递性：若$f \leqab g,\ g \leqab h$，由定义可得：
+           \begin{equation}
+           \begin{cases}
+             \forall a, f(a) \leqb g(a) \\
+             \forall b, g(b) \leqb h(b)
+           \end{cases}
+           \end{equation}
+           故任意$a \in A$，$f(a) \leqb g(a),\ g(a) \leqb h(a)$。由$(B,\leqb)$的传递性可得：
+           \begin{gather}
+             \forall a \in A, f(a) \leqb h(a)
+           \end{gather}
+           即$f \leqab h$。
+
+        3) 反对称性：若$f \leqab g,\ g \leqab f$，由定义可得：
+           \begin{equation}
+           \begin{cases}
+             \forall a, f(a) \leqb g(a) \\
+             \forall b, g(b) \leqb f(b)
+           \end{cases}
+           \end{equation}
+           故任意$a \in A$，$f(a) \leqb g(a),\ g(a) \leqb f(a)$。由$(B,\leqb)$的反对称性可得：
+           \begin{gather}
+             \forall a \in A, f(a) = g(a)
+           \end{gather}
+           即$f \leqab g$。
+
+        综上，$(A \to B, \leqab)$是一个偏序集。
+    \end{proof}
+
+  \subsection*{(2)}
+
+    \begin{proof}
+      已证$(A \to B, \leqab)$为偏序集，下面证其完备性。
+
+      取任意链$C=\{f_1,f_2,\cdots\} \st f_1 \leqab f_2 \leqab \cdots$，定义如下函数：
+      \begin{gather}
+        f_\infty(x) = \lub(\{f_1(x), f_2(x), \cdots\})
+      \end{gather}
+      则$f_\infty$为该链$C$的上确界。证明如下：
+
+      1) 任取$f_i \in C$，则对任意$a \in A$，$f_i(a)$属于$(B,\leqb)$中的链$C_B=\{f_1(a),f_2(a),\cdots\}$。
+         故由$(B,\leqb)$的完备性可得：
+         \begin{gather}
+           \forall a \in A, f_i(a) \leqb \lub(\{f_1(a),f_2(a),\cdots) = f_\infty(a) \\
+           \Leftrightarrow f_i \leqab f_\infty
+         \end{gather}
+         故任意$f_i \in C$，$f_i \leqab f_\infty$。
+
+      2) 对于某个$g \in A \to B \st \forall f_i \in C, f_i \leqab g$，即对任意$a \in A$，$f_i(a) \leqb g(a)$。
+         又因为$f_i(a) \in \{f_1(a),f_2(a),\cdots\}$这条$(B,\leqb)$上的链，故由其完备性：
+         \begin{gather}
+           \forall a \in A, \lub(\{f_1(a),f_2(a),\cdots\}) \leqb g(a) \\
+           \Leftrightarrow \forall a \in A, f_\infty(a) \leqb g(a) \\
+           \Leftrightarrow f_\infty \leqab g
+         \end{gather}
+         故任意$g \in A \to B \st \forall f_i \in C, f_i \leqab g$，都有$f_\infty \leqab g$。
+    \end{proof}
+
+  \subsection*{(3)}
+
+    \begin{proof}
+      已证$(A \to B, \leqab)$为偏序集，下面证其为完备格。
+
+      取任意子集$S=\{f_1,f_2,\cdots\}$，定义如下函数：
+      \begin{gather}
+        f_\infty(x) = \lub(\{f_1(x), f_2(x), \cdots\})
+      \end{gather}
+      则$f_\infty$为该子集$S$的上确界。证明如下：
+
+      1) 任取$f_i \in S$，则对任意$a \in A$，$f_i(a)$属于$(B,\leqb)$的子集$S_B=\{f_1(a),f_2(a),\cdots\}$。
+         故由$(B,\leqb)$为完备格可得：
+         \begin{gather}
+           \forall a \in A, f_i(a) \leqb \lub(\{f_1(a),f_2(a),\cdots) = f_\infty(a) \\
+           \Leftrightarrow f_i \leqab f_\infty
+         \end{gather}
+         故任意$f_i \in S$，$f_i \leqab f_\infty$。
+
+      2) 对于某个$g \in A \to B \st \forall f_i \in S, f_i \leqab g$，即对任意$a \in A$，$f_i(a) \leqb g(a)$。
+         又因为$f_i(a) \in \{f_1(a),f_2(a),\cdots\}$这个$(B,\leqb)$的子集，故由其为完备格：
+         \begin{gather}
+           \forall a \in A, \lub(\{f_1(a),f_2(a),\cdots\}) \leqb g(a) \\
+           \Leftrightarrow \forall a \in A, f_\infty(a) \leqb g(a) \\
+           \Leftrightarrow f_\infty \leqab g
+         \end{gather}
+         故任意$g \in A \to B \st \forall f_i \in S, f_i \leqab g$，都有$f_\infty \leqab g$。
+    \end{proof}
+
+  \section*{2}
+
+    \subsection*{(1)}
+
+      \begin{proof}
+        1) 单调性：已知函数$f(X)=X$单调，而$\circ$可保持$\supseteq$的关系，故$F(X)$单调。
+
+        2) 不连续：取如下无穷链：
+           \begin{gather}
+             \{0,1,2,3,\cdots\} \supseteq \{1,2,3,\cdots\} \supseteq \{2,3,\cdots\} \supseteq \cdots
+           \end{gather}
+           其$\lub$为$\emptyset$，则$F(\lub(C))=F(\emptyset)=\emptyset$。
+           对每个元素做$F$映射可得如下集合:
+           \begin{gather}
+             \left\{\{-1,1,2,3,\cdots\}, \{-1,2,3,\cdots\}, \{-1,3,\cdots\}, \cdots \right\}
+           \end{gather}
+           其$\lub$为$\{-1\} \neq \emptyset$。故不连续。
+      \end{proof}
+
+    \subsection*{(2)}
+
+      $\emptyset$
+
+    \subsection*{(3)}
+
+      \begin{align}
+        F(\mathbb{Z}) &= \{-1,1,2,3,\cdots\} \\
+        F^{(2)}(\mathbb{Z}) &= \{-1,2,3,\cdots\} \\
+        F^{(3)}(\mathbb{Z}) &= \{-1,3,\cdots\} \\
+        \cdots \\
+        F^{(n)}(\mathbb{Z}) &= \{-1,n,\cdots\}
+      \end{align}
+      故
+      \begin{gather}
+        \bigcap_{n\in\mathbb{N}}\left(F^{(n)}(\mathbb{Z})\right) = \{-1\}
+      \end{gather}
+      而
+      \begin{gather}
+        F(\{-1\}) = \emptyset
+      \end{gather}
+      故不是不动点。
+
+\end{document}
