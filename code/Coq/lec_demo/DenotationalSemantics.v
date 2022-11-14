@@ -1,3 +1,4 @@
+Require Import Coq.Init.Nat.
 Require Import Coq.Strings.String.
 Require Import Coq.Classes.RelationClasses.
 Require Import Coq.Classes.Morphisms.
@@ -10,7 +11,6 @@ Require Import Coq.micromega.Psatz.
     CompCert包。其二，从课程网站下载附件，将compcert_lib文件夹放在与平时课程文件
     所在文件夹并列的位置，依次编译Coqlib.v、Zbits.v与Integers.v这三个文件，再在
     本课程之前使用的_CoqProject文件中加入一行：-R compcert.lib ../compcert_lib。*)
-
 
 Require Import compcert.lib.Integers.
 Require Import PL.SetsDomain.
@@ -35,7 +35,6 @@ Ltac int64_lia :=
     归定义得到。*)
 
 
-
 (** 下面我们也试图使用类似的方式定义程序表达式以及程序语句的语义。*)
 
 (** * 表达式的指称语义 *)
@@ -44,7 +43,6 @@ Ltac int64_lia :=
 
 (** 依据解释器的C代码实现，很容易设想，将While+DB语言的表达式语义规定为程序状态
     到整数值的映射。例如，以下考虑一种极简的程序语言。*)
-
 
 
 Module Lang1.
@@ -119,8 +117,6 @@ Fixpoint eeval (e : expr) (st : prog_state) : Z :=
 
 
 
-
-
 Definition eequiv (e1 e2: expr): Prop :=
   forall s: prog_state, eeval e1 s = eeval e2 s.
 
@@ -139,6 +135,8 @@ Local Open Scope expr.
 Lemma EPlus_comm: forall e1 e2,
   [[e1 + e2]] == [[e2 + e1]].
 Proof.
+(* WORK IN CLASS *)
+  intros.
   unfold eequiv.
   intros.
   simpl.
@@ -149,6 +147,8 @@ Qed.
 Lemma EPlus_0_r: forall e,
   [[e + 0]] == [[e]].
 Proof.
+(* WORK IN CLASS *)
+  intros.
   unfold eequiv.
   intros.
   simpl.
@@ -157,8 +157,10 @@ Qed.
 
 
 
-(** 接下去，我们介绍语义等价的两条重要性质。其一：语义等价是一种等价关系。*)
 
+
+
+(** 接下去，我们介绍语义等价的两条重要性质。其一：语义等价是一种等价关系。*)
 
 
 (** 在Coq标准库中，_[Reflexive]_、_[Symmetric]_、_[Transitive]_以及
@@ -168,6 +170,7 @@ Qed.
 
 #[export] Instance eequiv_refl: Reflexive eequiv.
 Proof.
+(* WORK IN CLASS *)
   unfold Reflexive, eequiv.
   intros.
   reflexivity.
@@ -175,13 +178,16 @@ Qed.
 
 #[export] Instance eequiv_sym: Symmetric eequiv.
 Proof.
+(* WORK IN CLASS *)
   unfold Symmetric, eequiv.
   intros.
-  rewrite H. reflexivity.
+  rewrite H.
+  reflexivity.
 Qed.
 
 #[export] Instance eequiv_trans: Transitive eequiv.
 Proof.
+(* WORK IN CLASS *)
   unfold Transitive, eequiv.
   intros.
   rewrite H, H0.
@@ -199,7 +205,6 @@ Qed.
 (** 两条重要性质之二是：三种语法连接词能保持语义等价关系（congruence）。*)
 
 
-
 (** 在Coq中，这一性质可以表示为下面_[EPlus_eequiv_congr]_性质。这条性质说的是：
     _[EPlus]_是一个二元函数（因为_[Proper]_后_[EPlus]_前的括号中有两个_[==>]_箭
     头），并且，如果对其第一个参数做_[eequiv]_变换，对其第二个参数也做_[eequiv]_
@@ -213,6 +218,7 @@ Proof.
   (** 上述指令可以将_[Proper]_这一定义展开。可以看到，定义展开后，这条性质说的就
       是：加号能保持语义等价关系。*)
   unfold eequiv.
+  (* WORK IN CLASS *)
   intros.
   simpl.
   rewrite H, H0.
@@ -220,11 +226,13 @@ Proof.
 Qed.
 
 
+
 (** 减号与乘号保持语义等价关系的证明是类似的。*)
 
 #[export] Instance EMinus_eequiv_congr:
   Proper (eequiv ==> eequiv ==> eequiv) EMinus.
 Proof.
+(* WORK IN CLASS *)
   unfold Proper, respectful.
   unfold eequiv.
   intros.
@@ -236,6 +244,7 @@ Qed.
 #[export] Instance EMult_eequiv_congr:
   Proper (eequiv ==> eequiv ==> eequiv) EMult.
 Proof.
+(* WORK IN CLASS *)
   unfold Proper, respectful.
   unfold eequiv.
   intros.
@@ -245,7 +254,6 @@ Proof.
 Qed.
 
 (** 下面我们证明一条简单表达式变换的正确性：其变换前后表达式语义不变。*)
-
 
 
 (** 下面是常量折叠变换（constant folding）在Coq中的定义： *)
@@ -281,16 +289,7 @@ Proof.
   induction e; simpl.
   + reflexivity.
   + reflexivity.
-  (*  + destruct (CF e1), (CF e2).
-        2: {
-          rewrite <- IHe1, <- IHe2.
-          reflexivity.
-        }
-        the remaining subgoals can also be proved like this, so we use semicolon.
-        _[try]_ means "try to apply the proof if possible".
-  *)
   + destruct (CF e1), (CF e2); rewrite <- IHe1, <- IHe2; try reflexivity.
-    (* Then we prove the first subgoal. *)
     unfold eequiv; intros; simpl.
     reflexivity.
   + destruct (CF e1), (CF e2); rewrite <- IHe1, <- IHe2; try reflexivity.
@@ -309,7 +308,6 @@ End Lang1.
 (** 然而上面方案并没有考虑我们对于while语言只处理64位有符号整数运算的约定。上述
     定义事实上假设了程序能够表达的整数范围是无限的。这并不合理。为此，我们可以对
     上面定义的指称语义稍作修改。*)
-
 
 
 (** 在运算符的语义定义中，也应当把整数运算改为相应的64位整数运算。*)
@@ -340,7 +338,6 @@ Check Int64.and.
 
       _[Search (Int64.add _ _ = Int64.add _ _).]_
 *)
-
 
 
 (** 利用类似的方法，还可以搜索64位整数上的所有二元函数。*)
@@ -383,9 +380,8 @@ End Lang2.
     5段落）。然而，这一点并未在上面定义中得到体现。*)
 
 (** 为了解决这一问题，我们需要能够在定义中表达『程序表达式求值出错』这一概念。这
-    在数学上有两种常见方案。其一是将_[eeval]_的求值结果由64位整数集合改为64位整
-    数或求值失败。*)
-
+    在数学上有两种常见方案。其一是将求值结果由64位整数集合改为64位整数或求值失
+    败。*)
 
 
 
@@ -636,15 +632,26 @@ End Lang3H2.
 Definition doit3times {X:Type} (f:X->X) (n:X) : X :=
   f (f (f n)).
 
-Check @doit3times.
-Check @doit3times Z.
-Check @doit3times nat.
-
 (** 这里，_[f]_这个参数本身也是一个函数（从_[X]_到_[X]_的函数）而_[doit3times]_
     则把_[f]_在_[n]_上作用了3次。*)
 
 Definition minustwo (x: Z): Z := x - 2.
 
+Example fact_doit3times_1:
+  doit3times minustwo 9 = 3.
+Proof. reflexivity. Qed.
+
+Example fact_doit3times_2:
+  doit3times minustwo (doit3times minustwo 9) = -3.
+Proof. reflexivity. Qed.
+
+Example fact_doit3times_3:
+  doit3times (doit3times minustwo) 9 = -9.
+Proof. reflexivity. Qed.
+
+Example fact_doit3times_4:
+  doit3times doit3times minustwo 9 = -45.
+Proof. reflexivity. Qed.
 
 (** Coq中允许用户使用_[fun]_关键字表示匿名函数，例如：*)
 
@@ -656,42 +663,27 @@ Example fact_doit3times_anon2:
   doit3times (fun x => x * x) 2 = 256.
 Proof. reflexivity. Qed.
 
-Example fact_doit3times_doit3times:
-  doit3times doit3times minustwo 9 = -45.
-Proof. reflexivity. Qed.
-
-Example fact_di3t_1:
-  doit3times (fun x => -x) 5 = -5.
-Proof. reflexivity. Qed.
-
-Example fact_di3t_2:
-  doit3times (fun f x y => f y x) (fun x y => x - y) 1 2 = 1.
-Proof. reflexivity. Qed.
-
-Definition Func_add := fun f g (x : Z) => f x + g x.
-
-Example fact_di3t_3:
-  doit3times (Func_add minustwo) (fun x => x * x) 100 = (fun x => x * x + 3 * x - 6) 100.
-Proof. reflexivity. Qed.
-
-(* Func_add minustwo = fun f => (f(x) => f(x) + x - 2) *)
-
-Example fact_di3t_4:
-  doit3times ( ( fun x y => y * y - x * y + x * x ) 1 ) 1 = 1.
-Proof. reflexivity. Qed.
-
 (** 这里_[fun x => x - 2]_与之前定义的_[minustwo]_是相同的，而_[fun x => x * x]_
     则表示了平方这样一个函数。*)
 
+Example fact_doit3times_anon3:
+  doit3times (fun x => - x) 5 = -5.
+Proof. reflexivity. Qed.
 
+Example fact_doit3times_anon4:
+  doit3times (fun f x y => f y x) (fun x y => x - y) 1 2 = 1.
+Proof. reflexivity. Qed.
 
+Definition Func_add {A: Type}: (A -> Z) -> (A -> Z) -> (A -> Z) :=
+  fun f g x => f x + g x.
 
+Example fact_doit3times_anon5: forall x,
+  doit3times (Func_add minustwo) (fun x => x * x) x = x * x + x * 3 - 6.
+Proof. intros. unfold doit3times, Func_add, minustwo. lia. Qed.
 
-
-
-
-
-
+Example fact_doit3times_anon6:
+  doit3times ((fun x y => y * y - x * y + x * x) 1) 1 = 1.
+Proof. reflexivity. Qed.
 
 
 
@@ -701,11 +693,9 @@ Proof. reflexivity. Qed.
 
 (** ** 方案四 *)
 
-
 (** 上面我们讨论了将表达式语义定义为程序状态到_[option int64]_的函数这一方案。下
     面我们探讨另一种描述程序运行出错或未定义行为的方案，即将表达式的语义定义为程
     序状态与_[int64]_之间的二元关系。*)
-
 
 
 Module Lang4.
@@ -766,8 +756,6 @@ Fixpoint eeval (e : expr) : prog_state -> int64 -> Prop :=
 
 
 
-
-
 End Lang4.
 
 
@@ -775,7 +763,7 @@ End Lang4.
 (** ** 方案五 *)
 
 (** 到目前为止，我们考虑了极简的只包含加减乘算术运算的表达式的指称语义。其实，基
-    于上面的方案，我们很容易就可以定义大小比较、布尔运算以及地址取值的语义。*)
+   于上面的方案，我们很容易就可以定义大小比较、布尔运算以及地址取值的语义。*)
 
 
 
@@ -877,10 +865,7 @@ Definition arith_denote2
     n = int64fun n1 n2 /\
     Int64.signed n2 <> 0 /\
     (Int64.signed n1 <> Int64.min_signed \/
-     Int64.signed n2 <> -1).
-
-(* Int64.divs Int64.mods : signed *)
-(* Int64.divu Int64.modu : unsigned *)
+     Int64.signed n2 <> - 1).
 
 (** 下面是整数大小比较的定义，其中将直接使用CompCert中现有的定义。这里，
     _[comparison]_是CompCert中定义六种大小比较运算，_[Int64.cmp]_则定义了大小的
@@ -973,7 +958,7 @@ Definition not_denote
              (n: int64): Prop :=
   (exists n0,
      D s n0 /\
-     Int64.signed n <> 0 /\
+     Int64.signed n0 <> 0 /\
      n = Int64.repr 0) \/
   (D s (Int64.repr 0) /\ n = Int64.repr 1).
 
@@ -1008,10 +993,7 @@ Fixpoint eeval (e : expr): prog_state -> int64 -> Prop :=
 End WhileD_Expr.
 
 
-
 (** * 程序语句的指称语义 *)
-
-
 
 
 
@@ -1082,8 +1064,6 @@ Module BinRel.
 
 Definition id {A: Type}: A -> A -> Prop := fun a b => a = b.
 
-(* id = { (a, a) | a in A } *)
-
 (** 二元关系的连接： *)
 
 Definition concat
@@ -1114,19 +1094,24 @@ Lemma BinRel_concat_assoc:
     (R3: C -> D -> Prop),
   R1 ∘ (R2 ∘ R3) == (R1 ∘ R2) ∘ R3.
 Proof.
-  intros A B C D R1 R2 R3.
-  sets_unfold. unfold BinRel.concat.
-  intros a d. split; intros.
-  - destruct H as [b [? [c [? ?]]]].
+(* WORK IN CLASS *)
+  intros.
+  unfold BinRel.concat.
+  sets_unfold.
+  intros a d.
+  split; intros.
+  + destruct H as [b [? [c [? ?] ] ] ].
     exists c.
     split.
-    + exists b. tauto.
-    + tauto.
-  - destruct H as [c [[b [? ?]] ?]].
+    - exists b.
+      tauto.
+    - tauto.
+  + destruct H as [c [ [b [? ?] ] ] ?].
     exists b.
     split.
-    + tauto.
-    + exists c. tauto.
+    - tauto.
+    - exists c.
+      tauto.
 Qed.
 
 (** 下面两条性质证明了_[BinRel.id]_是二元关系连接运算的单位元。*)
@@ -1201,7 +1186,6 @@ Admitted. (* 留作习题 *)
 
 
 
-
 (** 下面依托上述二元关系间的运算，在Coq中定义顺序执行语句与条件分支语句的行为。*)
 
 Module Lang6.
@@ -1215,19 +1199,19 @@ Definition seq_denote
 
 Definition test0
              (D: prog_state -> int64 -> Prop)
-             (st1 st2: prog_state):  Prop :=
+             (st1 st2: prog_state): Prop :=
   st1 = st2 /\ D st1 (Int64.repr 0).
 
 Definition test1
              (D: prog_state -> int64 -> Prop)
-             (st1 st2: prog_state):  Prop :=
+             (st1 st2: prog_state): Prop :=
   exists n, st1 = st2 /\ D st1 n /\ Int64.unsigned n <> 0.
 
 Definition if_denote
              (D0: prog_state -> int64 -> Prop)
              (D1 D2: prog_state -> prog_state -> Prop):
   prog_state -> prog_state -> Prop :=
-  test1(D0) ∘ D1 ∪ test0(D0) ∘ D2.
+  (test1(D0) ∘ D1) ∪ (test0(D0) ∘ D2).
 
 (** 这样，我们就可以定义只包含赋值语句、顺序执行语句与条件分支语句程序语言的指称
     语义。*)
@@ -1244,6 +1228,40 @@ Fixpoint ceval (c: com): prog_state -> prog_state -> Prop :=
   | CIf e c1 c2 => if_denote (eeval e) (ceval c1) (ceval c2)
   end.
 
+
+(** ** 语义等价 *)
+
+
+
+Definition cequiv (c1 c2: com): Prop :=
+  ceval c1 == ceval c2.
+
+Declare Scope com_scope.
+Delimit Scope com_scope with com.
+Notation "c1 == c2" := (cequiv c1 c2)
+  (at level 70, no associativity): com_scope.
+
+(** 下面我们可以证明一些简单的语义等价的例子。*)
+
+
+Theorem CSeq_assoc: forall c1 c2 c3,
+  (CSeq c1 (CSeq c2 c3) == CSeq (CSeq c1 c2) c3)%com.
+Proof.
+  intros.
+  unfold cequiv; simpl; unfold seq_denote.
+  apply BinRel_concat_assoc.
+Qed.
+
+
+Theorem CIf_CSeq: forall e c1 c2 c3,
+  (CSeq (CIf e c1 c2) c3 == CIf e (CSeq c1 c3) (CSeq c2 c3))%com.
+Proof.
+  intros.
+  unfold cequiv; simpl; unfold if_denote, seq_denote.
+  rewrite !BinRel_concat_assoc.
+  apply BinRel_concat_union_distr_r.
+Qed.
+
 End Lang6.
 
 
@@ -1259,4 +1277,1458 @@ End Lang6.
 
 
 
+
+
+
+
+
+
+(** ** Coq中证明并应用Bourbaki-Witt不动点定理 *)
+
+(** 下面我们将在Coq中证明Bourbaki-Witt不动点定理。在Bourbaki-Witt不动点定理中，
+    我们需要证明满足某些特定条件（例如偏序、完备偏序等）的二元关系的一些性质。在
+    Coq中，我们当然可以通过_[R: A -> A -> Prop]_来探讨二元关系_[R]_的性质。然而
+    Coq中并不能给这样的变量设定Notation符号，例如，我们希望用_[a <= b]_来表示
+    _[R a b]_，因此我们选择使用Coq的_[Class]_来帮助我们完成定义。*)
+
+(** 下面这一定义说的是：_[Order]_是一类数学对象，任给一个类型_[A]_，_[Order A]_
+    也是一个类型，这个类型的每个元素都有一个域，这个域的名称是_[order_rel]_，它
+    的类型是_[A -> A -> Prop]_，即_[A]_上的二元关系。*)
+
+Class Order (A: Type): Type :=
+  order_rel: A -> A -> Prop.
+
+(** Coq中_[Class]_与_[Record]_有些像，但是有两点区别。第一：_[Class]_如果只有一
+    个域，它的中可以不使用大括号将这个域的定义围起来；第二：在定义或证明中，Coq
+    系统会试图自动搜索并填充类型为_[Class]_的参数，搜索范围为之前注册过可以使用
+    的_[Instance]_以及当前环境中的参数。例如，我们先前在证明等价关系、congruence
+    性质时就使用过_[Instance]_。例如，下面例子中，不需要指明_[order_rel]_是哪个
+    _[Order A]_的_[order_rel]_域，Coq会自动默认这是指_[RA]_的_[order_rel]_域。*)
+
+Check forall {A: Type} {RA: Order A} (x: A),
+        exists (y: A), order_rel x y.
+
+(** 这样，我们就可以为_[order_rel]_定义Notation符号。*)
+
+Declare Scope order_scope.
+Notation "a <= b" := (order_rel a b): order_scope.
+Local Open Scope order_scope.
+
+Check forall {A: Type} {RA: Order A} (x y: A),
+        x <= y \/ y <= x.
+
+(** 基于序关系，我们就可以定义上界与下界的概念。由于Bourbaki-Witt不动点定理中主
+    要需要探讨无穷长元素序列的上界与上确界，下面既定义了元素集合的上下界也定义了
+    元素序列的上下界。*)
+
+
+Definition is_lb
+             {A: Type} {RA: Order A}
+             (X: A -> Prop) (a: A): Prop :=
+  forall a', X a' -> a <= a'.
+
+Definition is_ub
+             {A: Type} {RA: Order A}
+             (X: A -> Prop) (a: A): Prop :=
+  forall a', X a' -> a' <= a.
+
+Definition is_omega_lb
+             {A: Type} {RA: Order A}
+             (l: nat -> A) (a: A): Prop :=
+  forall n, a <= l n.
+
+Definition is_omega_ub
+             {A: Type} {RA: Order A}
+             (l: nat -> A) (a: A): Prop :=
+  forall n, l n <= a.
+
+(** 下面定义序列的上确界，所谓上确界就是上界中最小的一个，因此它的定义包含两个子
+    句。而在后续证明中，使用上确界性质的时候，有时需要用其第一条性质，有时需要用
+    其第二条性质。为了后续证明的方便，这里在定义之外提供了使用这两条性质的方法：
+    _[is_omega_lub_sound]_与_[is_omega_lub_tight]_。比起在证明中使用_[destruct]_
+    指令拆解上确界的定义，使用这两条引理，可以使得Coq证明更自然地表达我们的证明
+    思路。之后我们将在证明偏序集上上确界唯一性的时候会看到相关的用法。*)
+
+
+Definition is_omega_lub
+             {A: Type} {RA: Order A}
+             (l: nat -> A) (a: A): Prop :=
+  is_omega_ub l a /\ is_lb (is_omega_ub l) a.
+
+Lemma is_omega_lub_sound:
+  forall {A: Type} {RA: Order A} {l: nat -> A} {a: A},
+    is_omega_lub l a -> is_omega_ub l a.
+Proof. unfold is_omega_lub; intros; tauto. Qed.
+
+Lemma is_omega_lub_tight:
+  forall {A: Type} {RA: Order A} {l: nat -> A} {a: A},
+    is_omega_lub l a -> is_lb (is_omega_ub l) a.
+Proof. unfold is_omega_lub; intros; tauto. Qed.
+
+(** 在编写Coq定义时，另有一个问题需要专门考虑，有些数学上的相等关系在Coq中只是一
+    种等价关系。例如，我们之前在Coq中用过集合相等的定义。因此，我们描述
+    Bourbaki-Witt不动点定理的前提条件时，也需要假设有一个与序关系相关的等价关
+    系，我们用_[Equiv]_表示，并用_[==]_这个符号描述这个等价关系。*)
+
+
+Class Equiv (A: Type): Type :=
+  equiv: A -> A -> Prop.
+
+Notation "a == b" := (equiv a b): order_scope.
+
+(** 基于此，我们可以定义基于等价关系的自反性与反对称性。注意，传递性的定义与这个
+    等价关系无关。这里我们也用_[Class]_定义，这与Coq标准库中的自反、对称、传递的
+    定义是类似的，但是也有不同：(1) 我们的定义需要探讨一个二元关系与一个等价关系
+    之间的联系，而Coq标准库中只考虑了这个等价关系是普通等号的情况；(2) Coq标准库
+    中直接使用二元关系_[R: A -> A -> Prop]_作为参数，而我们的参数使用了_[Order]_
+    与_[Equiv]_这两个_[Class]_。 *)
+
+(** 自反性： *)
+Class Reflexive_Setoid
+        (A: Type) {RA: Order A} {EA: Equiv A}: Prop :=
+  reflexivity_setoid:
+    forall a b, a == b -> a <= b.
+
+(** 反对称性： *)
+Class AntiSymmetric_Setoid
+        (A: Type) {RA: Order A} {EA: Equiv A}: Prop :=
+  antisymmetricity_setoid:
+    forall a b, a <= b -> b <= a -> a == b.
+
+(** 现在，我们就可以如下定义偏序关系。*)
+
+
+Class PartialOrder_Setoid
+        (A: Type) {RA: Order A} {EA: Equiv A}: Prop :=
+{
+  PO_Reflexive_Setoid:> Reflexive_Setoid A;
+  PO_Transitive:> Transitive order_rel;
+  PO_AntiSymmetric_Setoid:> AntiSymmetric_Setoid A
+}.
+
+(** 下面证明两条偏序集的基本性质。在Coq中，我们使用前引号_[`]_让Coq自动填充
+    _[Class]_类型元素的参数。例如，_[`{POA: PartialOrder_Setoid A}]_会指引Coq
+    额外填上_[RA: Order A]_和_[EA: Equiv A]_。*)
+
+
+(** 序关系两侧做等价变换不改变序关系：*)
+
+#[export] Instance PartialOrder_Setoid_Proper
+           {A: Type} `{POA: PartialOrder_Setoid A} {EquivA: Equivalence equiv}:
+  Proper (equiv ==> equiv ==> iff) order_rel.
+Proof.
+  unfold Proper, respectful.
+  intros.
+  split; intros.
+  + transitivity x0; [| apply reflexivity_setoid; tauto].
+    transitivity x; [apply reflexivity_setoid; symmetry; tauto |].
+    tauto.
+  + transitivity y0; [| apply reflexivity_setoid; symmetry; tauto].
+    transitivity y; [apply reflexivity_setoid; tauto |].
+    tauto.
+Qed.
+
+(** 如果两个序列的所有上界都相同，那么他们的上确界也相同（如果有的话）：*)
+
+Lemma same_omega_ub_same_omega_lub:
+  forall
+    {A: Type}
+    `{POA: PartialOrder_Setoid A}
+    (l1 l2: nat -> A)
+    (a1 a2: A),
+  (is_omega_ub l1 == is_omega_ub l2)%sets ->
+  is_omega_lub l1 a1 ->
+  is_omega_lub l2 a2 ->
+  a1 == a2.
+Proof.
+  intros A ? ? POA.
+  sets_unfold.
+  intros.
+  apply antisymmetricity_setoid.
+  + apply (is_omega_lub_tight H0).
+    apply H.
+    apply (is_omega_lub_sound H1).
+  + apply (is_omega_lub_tight H1).
+    apply H.
+    apply (is_omega_lub_sound H0).
+Qed.
+
+(** 证明Bourbaki-Witt不动点定理时还需要定义完备偏序集，由于在其证明中实际只用到
+    了完备偏序集有最小元和任意单调不减的元素序列有上确界，我们在Coq定义时也只考
+    虑符合这两个条件的偏序集，我们称为OmegaCPO，Omega表示可数无穷多项的意思。另
+    外，尽管数学上仅仅要求完备偏序集上的所有链有上确界，但是为了Coq证明的方便，
+    我们将_[omega_lub]_定义为所有元素序列的上确界计算函数，只不过我们仅仅要求该
+    函数在其参数为单调不减序列时能确实计算出上确界，见_[oCPO_completeness]_。*)
+
+
+Class OmegaLub (A: Type): Type :=
+  omega_lub: (nat -> A) -> A.
+
+Class Bot (A: Type): Type :=
+  bot: A.
+
+
+Definition increasing
+             {A: Type} {RA: Order A} (l: nat -> A): Prop :=
+  forall n, l n <= l (S n).
+
+Definition is_least {A: Type} {RA: Order A} (a: A): Prop :=
+  forall a', a <= a'.
+
+Class OmegaCompletePartialOrder_Setoid
+        (A: Type)
+        {RA: Order A} {EA: Equiv A}
+        {oLubA: OmegaLub A} {BotA: Bot A}: Prop :=
+{
+  oCPO_PartialOrder:> PartialOrder_Setoid A;
+  oCPO_completeness: forall T,
+    increasing T -> is_omega_lub T (omega_lub T);
+  bot_is_least: is_least bot
+}.
+
+(** 利用这里定义中的_[omega_lub]_函数，可以重述先前证明过的性质：两个单调不减序
+    列如果拥有完全相同的上界，那么他们也有同样的上确界。*)
+
+Lemma same_omega_ub_same_omega_lub':
+  forall
+    {A: Type}
+    `{oCPOA: OmegaCompletePartialOrder_Setoid A}
+    (l1 l2: nat -> A),
+  (is_omega_ub l1 == is_omega_ub l2)%sets ->
+  increasing l1 ->
+  increasing l2 ->
+  omega_lub l1 == omega_lub l2.
+Proof.
+  intros.
+  apply (same_omega_ub_same_omega_lub _ _ _ _ H).
+  + apply oCPO_completeness.
+    apply H0.
+  + apply oCPO_completeness.
+    apply H1.
+Qed.
+
+(** 下面定义单调连续函数。*)
+
+
+Definition mono
+             {A B: Type}
+             `{POA: PartialOrder_Setoid A}
+             `{POB: PartialOrder_Setoid B}
+             (f: A -> B): Prop :=
+  forall a1 a2, a1 <= a2 -> f a1 <= f a2.
+
+
+Definition continuous
+             {A B: Type}
+             `{oCPOA: OmegaCompletePartialOrder_Setoid A}
+             `{oCPOB: OmegaCompletePartialOrder_Setoid B}
+             (f: A -> B): Prop :=
+  forall l: nat -> A,
+    increasing l ->
+    f (omega_lub l) == omega_lub (fun n => f (l n)).
+
+(** 下面我们可以证明：自反函数是单调连续的、复合函数能保持单调连续性。*)
+
+(** 自反函数的单调性：*)
+Lemma id_mono:
+  forall {A: Type}
+         `{POA: PartialOrder_Setoid A},
+  mono (fun x => x).
+Proof.
+Admitted. (* 留作习题 *)
+
+(** 复合函数保持单调性：*)
+Lemma compose_mono:
+  forall {A B C: Type}
+         `{POA: PartialOrder_Setoid A}
+         `{POB: PartialOrder_Setoid B}
+         `{POC: PartialOrder_Setoid C}
+         (f: A -> B)
+         (g: B -> C),
+  mono f -> mono g -> mono (fun x => g (f x)).
+Proof.
+Admitted. (* 留作习题 *)
+
+(** 自反函数的连续性：*)
+Lemma id_continuous:
+  forall {A: Type}
+         `{oCPOA: OmegaCompletePartialOrder_Setoid A}
+         {EquivA: Equivalence equiv},
+  continuous (fun x => x).
+Proof.
+Admitted. (* 留作习题 *)
+
+(** 这里，要证明单调连续函数的复合结果也是连续的要复杂一些。显然，这其中需要证明
+    一个单调函数作用在一个单调不减序列的每一项后还会得到一个单调不减序列。下面的
+    引理_[increasing_mono_increasing]_描述了这一性质。*)
+Lemma increasing_mono_increasing:
+  forall {A B: Type}
+         `{POA: PartialOrder_Setoid A}
+         `{POB: PartialOrder_Setoid B}
+         (f: A -> B)
+         (l: nat -> A),
+  increasing l -> mono f -> increasing (fun n => f (l n)).
+Proof.
+Admitted. (* 留作习题 *)
+
+(** 除此之外，我们还需要证明单调函数能保持相等关系，即，如果_[f]_是一个单调函
+    数，那么_[x == y]_能推出_[f x == f y]_。当然，如果这里的等价关系就是等号描述
+    的相等关系，那么这个性质是显然的。但是，对于一般的等价关系，这就并不显然了。
+    这一引理的正确性依赖于偏序关系中的自反性和反对称性。*)
+Lemma mono_equiv_congr:
+  forall {A B: Type}
+         `{POA: PartialOrder_Setoid A}
+         `{POB: PartialOrder_Setoid B}
+          {EquivA: Equivalence (equiv: A -> A -> Prop)}
+         (f: A -> B),
+  mono f -> Proper (equiv ==> equiv) f.
+Proof.
+Admitted. (* 留作习题 *)
+
+(** 现在，可以利用上面两条引理证明复合函数的连续性了。*)
+Lemma compose_continuous:
+  forall {A B C: Type}
+         `{oCPOA: OmegaCompletePartialOrder_Setoid A}
+         `{oCPOB: OmegaCompletePartialOrder_Setoid B}
+         `{oCPOC: OmegaCompletePartialOrder_Setoid C}
+          {EquivB: Equivalence (equiv: B -> B -> Prop)}
+          {EquivC: Equivalence (equiv: C -> C -> Prop)}
+         (f: A -> B)
+         (g: B -> C),
+  mono f ->
+  mono g ->
+  continuous f ->
+  continuous g ->
+  continuous (fun x => g (f x)).
+Proof.
+Admitted. (* 留作习题 *)
+
+(** 到目前为止，我们已经定义了Omega完备偏序集与单调连续函数。在证明Bourbaki-Witt
+    不动点定理之前还需要最后一项准备工作：定理描述本身的合法性。即，我们需要证明
+    _[bot]_, _[f bot]_, _[f (f bot)]_...这个序列的单调性。我们利用Coq标准库中的
+    _[Nat.iter]_来定义这个序列，_[Nat.iter n f bot]_表示将_[f]_连续_[n]_次作用在
+    _[bot]_上。*)
+
+Lemma iter_bot_increasing:
+  forall
+    {A: Type}
+    `{oCPOA: OmegaCompletePartialOrder_Setoid A}
+    (f: A -> A),
+    mono f ->
+    increasing (fun n => Nat.iter n f bot).
+Proof.
+  unfold increasing.
+  intros.
+  induction n; simpl.
+  + apply bot_is_least.
+  + apply H.
+    apply IHn.
+Qed.
+
+(** 当然，_[f bot]_, _[f (f bot)]_, _[f (f (f bot))]_...这个序列也是单调不减的。*)
+Lemma iter_S_bot_increasing:
+  forall
+    {A: Type}
+    `{oCPOA: OmegaCompletePartialOrder_Setoid A}
+    (f: A -> A),
+    mono f ->
+    increasing (fun n => f (Nat.iter n f bot)).
+Proof.
+  unfold increasing.
+  intros.
+  apply H.
+  apply iter_bot_increasing.
+  apply H.
+Qed.
+
+(** _[BW_LFix]_定义了Bourbaki-Witt最小不动点。*)
+Definition BW_LFix
+             {A: Type}
+             `{CPOA: OmegaCompletePartialOrder_Setoid A}
+             (f: A -> A): A :=
+  omega_lub (fun n => Nat.iter n f bot).
+
+(** 先证明，_[BW_LFix]_的计算结果确实是一个不动点。*)
+Lemma BW_LFix_is_fix:
+  forall
+    {A: Type}
+    `{CPOA: OmegaCompletePartialOrder_Setoid A}
+    {EquivA: Equivalence equiv}
+    (f: A -> A),
+    mono f ->
+    continuous f ->
+    f (BW_LFix f) == BW_LFix f.
+Proof.
+  unfold BW_LFix; intros.
+  rewrite H0 by (apply iter_bot_increasing; tauto).
+  apply same_omega_ub_same_omega_lub'.
+  + intros; unfold is_omega_ub.
+    split; intros.
+    - destruct n.
+      * apply bot_is_least.
+      * apply H1.
+    - specialize (H1 (S n)).
+      apply H1.
+  + apply iter_S_bot_increasing.
+    apply H.
+  + apply iter_bot_increasing.
+    apply H.
+Qed.
+
+(** 再证明，_[BW_LFix]_的计算结果是最小不动点。*)
+Lemma BW_LFix_is_least_fix:
+  forall
+    {A: Type}
+    `{CPOA: OmegaCompletePartialOrder_Setoid A}
+    {EquivA: Equivalence equiv}
+    (f: A -> A)
+    (a: A),
+    mono f ->
+    continuous f ->
+    f a == a ->
+    BW_LFix f <= a.
+Proof.
+  unfold BW_LFix; intros.
+  pose proof iter_bot_increasing f H.
+  pose proof oCPO_completeness (fun n => Nat.iter n f bot) H2.
+  apply (is_omega_lub_tight H3).
+  unfold is_omega_ub.
+  induction n; simpl.
+  + apply bot_is_least.
+  + rewrite <- H1.
+    apply H.
+    apply IHn.
+Qed.
+
+Local Close Scope order_scope.
+
+(** 接下去我们将利用Bourbaki-Witt最小不动点定义While语句的程序语义中运行终止的情
+    况。*)
+
+(** 首先需要定义我们所需的OmegaCPO。在定义_[Class]_类型的值时，可以使用
+    _[Intance]_关键字。如果_[Class]_中只有一个域并且_[Class]_的定义没有使用大括
+    号包围所有域，那么这个域的定义就是整个_[Class]_类型的值的定义；否则_[Class]_
+    类型的值应当像_[Record]_类型的值一样定义。*)
+#[export] Instance R_while_fin {A B: Type}: Order (A -> B -> Prop) :=
+  Sets.included.
+
+#[export] Instance Equiv_while_fin {A B: Type}: Equiv (A -> B -> Prop) :=
+  Sets.equiv.
+
+(** 下面证明这是一个偏序关系。证明的时候需要展开上面两个二元关系（一个表示序关系
+    另一个表示等价关系）。以序关系为例，此时需要将_[R_while_fin]_与_[order_rel]_
+    全部展开，前者表示将上面的定义展开，后者表示将从_[Class Order]_取出
+    _[order_rel]_域这一操作展开。其余的证明则只需用_[sets_unfold]_证明集合相关的
+    性质。*)
+#[export] Instance PO_while_fin {A B: Type}: PartialOrder_Setoid (A -> B -> Prop).
+Proof.
+  split.
+  + unfold Reflexive_Setoid.
+    unfold equiv, order_rel, R_while_fin, Equiv_while_fin; simpl.
+    sets_unfold; intros a b H x y.
+    specialize (H x y).
+    tauto.
+  + unfold Transitive.
+    unfold equiv, order_rel, R_while_fin, Equiv_while_fin; simpl.
+    sets_unfold; intros a b c H H0 x y.
+    specialize (H x y).
+    specialize (H0 x y).
+    tauto.
+  + unfold AntiSymmetric_Setoid.
+    unfold equiv, order_rel, R_while_fin, Equiv_while_fin; simpl.
+    sets_unfold; intros a b H H0 x y.
+    specialize (H x y).
+    specialize (H0 x y).
+    tauto.
+Qed.
+
+(** 下面再定义上确界计算函数与完备偏序集中的最小值。*)
+#[export] Instance oLub_while_fin {A B: Type}: OmegaLub (A -> B -> Prop) :=
+  Sets.omega_union.
+
+#[export] Instance Bot_while_fin {A B: Type}: Bot (A -> B -> Prop) :=
+  ∅: A -> B -> Prop.
+
+(** 下面证明这构成一个Omega完备偏序集。*)
+#[export] Instance oCPO_while_fin {A B: Type}:
+  OmegaCompletePartialOrder_Setoid (A -> B -> Prop).
+Proof.
+  split.
+  + apply PO_while_fin.
+  + unfold increasing, is_omega_lub, is_omega_ub, is_lb.
+    unfold omega_lub, order_rel, R_while_fin, oLub_while_fin; simpl.
+    sets_unfold; intros T H.
+    split.
+    - intros n x y; intros.
+      exists n.
+      tauto.
+    - intros a H0 x y H1.
+      destruct H1 as [n ?].
+      specialize (H0 n x y).
+      tauto.
+  + unfold is_least.
+    unfold bot, order_rel, R_while_fin, Bot_while_fin; simpl.
+    sets_unfold; intros a.
+    tauto.
+Qed.
+
+(** 额外需要补充一点：_[Equiv_while_fin]_确实是一个等价关系。先前Bourbaki-Witt不
+    动点定理的证明中用到了这一前提。*)
+#[export] Instance Equiv_equiv_while_fin {A B: Type}:
+  Equivalence (@equiv (A -> B -> Prop) _).
+Proof.
+  apply Sets_equiv_equiv.
+Qed.
+
+(** 下面开始证明_[F(X) = (test1(D0) ∘ D ∘ while_denote D0 D) ∪ test0(D0)]_这个函
+    数的单调性与连续性。整体证明思路是：(1) _[F(X) = X]_是单调连续的；(2) 如果
+    _[F]_是单调连续的，那么_[G(X) = Y ∘ F(X)]_也是单调连续的；(3) 如果_[F]_是单
+    调连续的，那么_[G(X) = F(X) ∪ Y]_也是单调连续的；其中_[Y]_是给定的二元关系。*)
+
+(** 首先证明二元关系的连接能保持集合之间的包含关系。*)
+#[export] Instance BinRel_concat_included_congr:
+  forall A B C: Type,
+    Proper
+      (Sets.included ==> Sets.included ==> Sets.included)
+      (@BinRel.concat A B C).
+Proof.
+Admitted. (* 留作习题 *)
+
+(** 基于此也容易证明，二元关系的连接能保持集合之间的相等关系。*)
+#[export] Instance BinRel_concat_equiv_congr:
+  forall A B C: Type,
+    Proper
+      (Sets.equiv ==> Sets.equiv ==> Sets.equiv)
+      (@BinRel.concat A B C).
+Proof.
+  intros.
+  unfold Proper, respectful; intros.
+  apply Sets_equiv_Sets_included.
+  split; apply BinRel_concat_included_congr.
+  + rewrite H; reflexivity.
+  + rewrite H0; reflexivity.
+  + rewrite H; reflexivity.
+  + rewrite H0; reflexivity.
+Qed.
+
+(** 下面证明前面提到的步骤(2)：如果_[F]_是单调连续的，那么_[G(X) = Y ∘ F(X)]_也
+    是单调连续的。主结论为_[BinRel_concat_left_mono_and_continuous]_，其用到了两
+    条下面的辅助引理以及前面证明过的复合函数单调连续性定理。*)
+
+Lemma BinRel_concat_left_mono:
+  forall (A B C: Type) (Y: A -> B -> Prop),
+    mono (fun X: B -> C -> Prop => Y ∘ X).
+Proof.
+  intros.
+  unfold mono.
+  unfold order_rel, R_while_fin.
+  intros.
+  apply BinRel_concat_included_congr.
+  + reflexivity.
+  + apply H.
+Qed.
+
+Lemma BinRel_concat_left_continuous:
+  forall (A B C: Type) (Y: A -> B -> Prop),
+    continuous (fun X: B -> C -> Prop => Y ∘ X).
+Proof.
+  intros.
+  unfold continuous.
+  unfold increasing, omega_lub, order_rel, equiv,
+         oLub_while_fin, R_while_fin, Equiv_while_fin.
+  intros.
+  apply BinRel_concat_omega_union_distr_l.
+Qed.
+
+Lemma BinRel_concat_left_mono_and_continuous:
+  forall
+    (A B C: Type)
+    (Y: A -> B -> Prop)
+    (f: (B -> C -> Prop) -> (B -> C -> Prop)),
+  mono f /\ continuous f ->
+  mono (fun X => Y ∘ f X) /\ continuous (fun X => Y ∘ f X).
+Proof.
+  intros.
+  destruct H.
+  pose proof BinRel_concat_left_mono _ _ C Y.
+  pose proof BinRel_concat_left_continuous _ _ C Y.
+  split.
+  + exact (compose_mono f _ H H1).
+  + exact (compose_continuous f _ H H1 H0 H2).
+Qed.
+
+(** 下面证明前面提到的步骤(3)：如果_[F]_是单调连续的，那么_[G(X) = Y ∘ F(X)]_也
+    是单调连续的。主结论为_[union_right2_mono_and_continuous]_，其用到了两条下面
+    的辅助引理以及前面证明过的复合函数单调连续性定理。*)
+
+Lemma union_right2_mono:
+  forall (A B: Type) (Y: A -> B -> Prop),
+    mono (fun X => X ∪ Y).
+Proof.
+  intros.
+  unfold mono.
+  unfold order_rel, R_while_fin.
+  sets_unfold.
+  intros R R' H st1 st2.
+  specialize (H st1 st2).
+  tauto.
+Qed.
+
+Lemma union_right2_continuous:
+  forall (A B: Type) (Y: A -> B -> Prop),
+    continuous (fun X => X ∪ Y).
+Proof.
+  intros.
+  unfold continuous.
+  unfold increasing, omega_lub, order_rel, equiv,
+         oLub_while_fin, R_while_fin, Equiv_while_fin.
+  sets_unfold.
+  intros l H st1 st2.
+  split; intros.
+  + destruct H0 as [ [ n ? ] | ?].
+    - exists n; tauto.
+    - exists O; tauto.
+  + destruct H0 as [n [? | ? ] ].
+    - left.
+      exists n; tauto.
+    - tauto.
+Qed.
+
+Lemma union_right2_mono_and_continuous:
+  forall
+    (A B: Type)
+    (Y: A -> B -> Prop)
+    (f: (A -> B -> Prop) -> (A -> B -> Prop)),
+  mono f /\ continuous f ->
+  mono (fun X => f X ∪ Y) /\ continuous (fun X => f X ∪ Y).
+Proof.
+  intros.
+  destruct H.
+  pose proof union_right2_mono _ _ Y.
+  pose proof union_right2_continuous _ _ Y.
+  split.
+  + exact (compose_mono f _ H H1).
+  + exact (compose_continuous f _ H H1 H0 H2).
+Qed.
+
+(** 最终我们可以用Bourbaki-Witt不动点定义while语句运行终止的情况。*)
+Module Lang7.
+
+Import WhileD_Expr Lang5 Lang6.
+
+(** 首先给出语义定义。*)
+Definition while_denote
+             (D0: prog_state -> int64 -> Prop)
+             (D: prog_state -> prog_state -> Prop):
+  prog_state -> prog_state -> Prop :=
+  BW_LFix (fun X => (test1(D0) ∘ D ∘ X) ∪ test0(D0)).
+
+(** 下面可以直接使用Bourbaki-Witt不动点定理证明上述定义就是我们要的最小不动点。*)
+Theorem while_denote_is_least_fix: forall D0 D,
+  ((test1(D0) ∘ D ∘ while_denote D0 D) ∪ test0(D0) == while_denote D0 D)%sets /\
+  (forall X, (test1(D0) ∘ D ∘ X) ∪ test0(D0) == X -> while_denote D0 D ⊆ X)%sets.
+Proof.
+  intros.
+  assert (mono (fun X => (test1(D0) ∘ D ∘ X) ∪ test0(D0)) /\
+          continuous (fun X => (test1(D0) ∘ D ∘ X) ∪ test0(D0))).
+  {
+    apply union_right2_mono_and_continuous.
+    apply BinRel_concat_left_mono_and_continuous.
+    apply BinRel_concat_left_mono_and_continuous.
+    split.
+    + apply id_mono.
+    + apply id_continuous.
+  }
+  destruct H.
+  split.
+  + apply (BW_LFix_is_fix (fun X => (test1(D0) ∘ D ∘ X) ∪ test0(D0)));
+      tauto.
+  + intros X.
+    apply (BW_LFix_is_least_fix (fun X => (test1(D0) ∘ D ∘ X) ∪ test0(D0)));
+      tauto.
+Qed.
+
+End Lang7.
+
+
+(** 下面可以用类似方法定义循环语句出错的情况。*)
+
+
+
+(** 首先定义用于定义不动点的OmegaCPO。*)
+
+#[export] Instance R_while_err {A: Type}: Order (A -> Prop) :=
+  Sets.included.
+
+#[export] Instance Equiv_while_err {A: Type}: Equiv (A -> Prop) :=
+  Sets.equiv.
+
+#[export] Instance PO_while_err {A: Type}: PartialOrder_Setoid (A -> Prop).
+Proof.
+  split.
+  + unfold Reflexive_Setoid.
+    unfold equiv, order_rel, R_while_err, Equiv_while_err; simpl.
+    sets_unfold; intros a b H x.
+    specialize (H x).
+    tauto.
+  + unfold Transitive.
+    unfold equiv, order_rel, R_while_err, Equiv_while_err; simpl.
+    sets_unfold; intros a b c H H0 x.
+    specialize (H x).
+    specialize (H0 x).
+    tauto.
+  + unfold AntiSymmetric_Setoid.
+    unfold equiv, order_rel, R_while_err, Equiv_while_err; simpl.
+    sets_unfold; intros a b H H0 x.
+    specialize (H x).
+    specialize (H0 x).
+    tauto.
+Qed.
+
+#[export] Instance oLub_while_err {A: Type}: OmegaLub (A -> Prop) :=
+  Sets.omega_union.
+
+#[export] Instance Bot_while_err {A: Type}: Bot (A -> Prop) :=
+  ∅: A -> Prop.
+
+#[export] Instance oCPO_while_err {A: Type}:
+  OmegaCompletePartialOrder_Setoid (A -> Prop).
+Proof.
+  split.
+  + apply PO_while_err.
+  + unfold increasing, is_omega_lub, is_omega_ub, is_lb.
+    unfold omega_lub, order_rel, R_while_err, oLub_while_err; simpl.
+    sets_unfold; intros T H.
+    split.
+    - intros n x; intros.
+      exists n.
+      tauto.
+    - intros a H0 x H1.
+      destruct H1 as [n ?].
+      specialize (H0 n x).
+      tauto.
+  + unfold is_least.
+    unfold bot, order_rel, R_while_err, Bot_while_err; simpl.
+    sets_unfold; intros a.
+    tauto.
+Qed.
+
+#[export] Instance Equiv_equiv_while_err {A: Type}:
+  Equivalence (@equiv (A -> Prop) _).
+Proof.
+  apply Sets_equiv_equiv.
+Qed.
+
+(** 其次，我们需要证明_[BinRel.dia]_的系列性质。它与二元关系的连接之间有结合律，
+    它本身对并集也有分配律。我们在Coq中当然可以像之前一样直接用集合性质进行证明，
+    但是也可以利用先前证明过二元关系连接的性质帮助我们证明。*)
+
+Definition ToRel {A: Type} (X: A -> Prop): A -> unit -> Prop :=
+  fun a _ => X a.
+
+(** 上面这个函数将一个一元关系_[X]_变换为了_[A]_与单元集_[unit]_之间的二元关系。
+    我们可以利用这个函数将一元关系和二元关系联系起来。在Coq中_[unit]_表示单元
+    集，这个集合中的唯一元素是_[tt]_。下面是五个转化引理：*)
+
+Lemma ToRel_equiv:
+  forall {A: Type} (X Y: A -> Prop),
+    X == Y <-> ToRel X == ToRel Y.
+Proof.
+  intros A.
+  sets_unfold; unfold ToRel; intros.
+  split; intros.
+  + apply H.
+  + apply (H a tt).
+Qed.
+
+Lemma ToRel_included:
+  forall {A: Type} (X Y: A -> Prop),
+    X ⊆ Y <-> ToRel X ⊆ ToRel Y.
+Proof.
+  intros A.
+  sets_unfold; unfold ToRel; intros.
+  split; intros.
+  + apply H; tauto.
+  + apply (H a tt); tauto.
+Qed.
+
+Lemma ToRel_BinRel_dia:
+  forall {A B: Type} (X: A -> B -> Prop) (Y: B -> Prop),
+    ToRel (BinRel.dia X Y) == X ∘ ToRel Y.
+Proof.
+  intros A.
+  sets_unfold; unfold ToRel, BinRel.dia, BinRel.concat; intros.
+  tauto.
+Qed.
+
+Lemma ToRel_union:
+  forall {A: Type} (X Y: A -> Prop),
+    ToRel (X ∪ Y) == ToRel X ∪ ToRel Y.
+Proof.
+  intros A.
+  sets_unfold; unfold ToRel, Sets.union; intros.
+  tauto.
+Qed.
+
+Lemma ToRel_omega_union:
+  forall {A: Type} (X: nat -> A -> Prop),
+    ToRel (⋃ X) == ⋃ (fun n => ToRel (X n)).
+Proof.
+  intros A.
+  sets_unfold; unfold ToRel, Sets.omega_union; intros.
+  tauto.
+Qed.
+
+(** 接下去借助上面转化引理证明_[BinRel.dia]_的性质。*)
+
+Lemma BinRel_concat_dia:
+  forall {A B C}
+    (R1: A -> B -> Prop)
+    (R2: B -> C -> Prop)
+    (X: C -> Prop),
+      BinRel.dia R1 (BinRel.dia R2 X) == BinRel.dia (R1 ∘ R2) X.
+Proof.
+  intros.
+  apply ToRel_equiv.
+  rewrite !ToRel_BinRel_dia.
+  apply BinRel_concat_assoc.
+Qed.
+
+Lemma BinRel_dia_union_distr_r:
+  forall
+    {A B}
+    (R1 R2: A -> B -> Prop)
+    (R3: B -> Prop),
+  BinRel.dia (R1 ∪ R2) R3 ==
+  (BinRel.dia R1 R3) ∪ (BinRel.dia R2 R3).
+Proof.
+  intros.
+  apply ToRel_equiv.
+  rewrite !ToRel_BinRel_dia, !ToRel_union.
+  apply BinRel_concat_union_distr_r.
+Qed.
+
+Lemma BinRel_dia_union_distr_l:
+  forall
+    {A B}
+    (R1: A -> B -> Prop)
+    (R2 R3: B -> Prop),
+  BinRel.dia R1 (R2 ∪ R3) ==
+  (BinRel.dia R1 R2) ∪ (BinRel.dia R1 R3).
+Proof.
+  intros.
+  apply ToRel_equiv.
+  rewrite !ToRel_BinRel_dia, !ToRel_union.
+  apply BinRel_concat_union_distr_l.
+Qed.
+
+Lemma BinRel_dia_omega_union_distr_r:
+  forall
+    {A B}
+    (R1: nat -> A -> B -> Prop)
+    (R2: B -> Prop),
+  BinRel.dia (⋃ R1) R2 == ⋃ (fun n => BinRel.dia (R1 n) R2).
+Proof.
+  intros.
+  apply ToRel_equiv.
+  rewrite !ToRel_BinRel_dia, !ToRel_omega_union.
+  rewrite BinRel_concat_omega_union_distr_r.
+  apply Sets_omega_union_congr.
+  intros n.
+  rewrite ToRel_BinRel_dia.
+  reflexivity.
+Qed.
+
+Lemma BinRel_dia_omega_union_distr_l:
+  forall
+    {A B}
+    (R1: A -> B -> Prop)
+    (R2: nat -> B -> Prop),
+  BinRel.dia R1 (⋃ R2) == ⋃ (fun n => BinRel.dia R1 (R2 n)).
+Proof.
+  intros.
+  apply ToRel_equiv.
+  rewrite !ToRel_BinRel_dia, !ToRel_omega_union.
+  rewrite BinRel_concat_omega_union_distr_l.
+  apply Sets_omega_union_congr.
+  intros n.
+  rewrite ToRel_BinRel_dia.
+  reflexivity.
+Qed.
+
+#[export] Instance BinRel_dia_included_congr:
+  forall A B: Type,
+    Proper
+      (Sets.included ==> Sets.included ==> Sets.included)
+      (@BinRel.dia A B).
+Proof.
+  intros; unfold Proper, respectful; intros.
+  apply ToRel_included; apply ToRel_included in H0.
+  rewrite !ToRel_BinRel_dia.
+  apply BinRel_concat_included_congr; tauto.
+Qed.
+
+#[export] Instance BinRel_dia_equiv_congr:
+  forall A B: Type,
+    Proper
+      (Sets.equiv ==> Sets.equiv ==> Sets.equiv)
+      (@BinRel.dia A B).
+Proof.
+  intros; unfold Proper, respectful; intros.
+  apply ToRel_equiv; apply ToRel_equiv in H0.
+  rewrite !ToRel_BinRel_dia.
+  apply BinRel_concat_equiv_congr; tauto.
+Qed.
+
+(** 接下去是单调连续性相关的证明。*)
+
+Lemma BinRel_dia_left_mono:
+  forall (A B: Type) (Y: A -> B -> Prop),
+    mono (fun X => BinRel.dia Y X).
+Proof.
+  intros.
+  unfold mono.
+  unfold order_rel, R_while_fin.
+  intros.
+  apply BinRel_dia_included_congr.
+  + reflexivity.
+  + apply H.
+Qed.
+
+Lemma BinRel_dia_left_continuous:
+  forall (A B: Type) (Y: A -> B -> Prop),
+    continuous (fun X => BinRel.dia Y X).
+Proof.
+  intros.
+  unfold continuous.
+  unfold increasing, omega_lub, order_rel, equiv,
+         oLub_while_fin, R_while_fin, Equiv_while_fin.
+  intros.
+  apply BinRel_dia_omega_union_distr_l.
+Qed.
+
+Lemma BinRel_dia_left_mono_and_continuous:
+  forall
+    (A B: Type)
+    (Y: A -> B -> Prop)
+    (f: (B -> Prop) -> (B -> Prop)),
+  mono f /\ continuous f ->
+  mono (fun X => BinRel.dia Y (f X)) /\
+  continuous (fun X => BinRel.dia Y (f X)).
+Proof.
+  intros.
+  destruct H.
+  pose proof BinRel_dia_left_mono _ _ Y.
+  pose proof BinRel_dia_left_continuous _ _ Y.
+  split.
+  + exact (compose_mono f _ H H1).
+  + exact (compose_continuous f _ H H1 H0 H2).
+Qed.
+
+Lemma union_right1_mono:
+  forall (A: Type) (Y: A -> Prop),
+    mono (fun X => X ∪ Y).
+Proof.
+  intros.
+  unfold mono.
+  unfold order_rel, R_while_err.
+  sets_unfold.
+  intros R R' H st.
+  specialize (H st).
+  tauto.
+Qed.
+
+Lemma union_right1_continuous:
+  forall (A: Type) (Y: A -> Prop),
+    continuous (fun X => X ∪ Y).
+Proof.
+  intros.
+  unfold continuous.
+  unfold increasing, omega_lub, order_rel, equiv,
+         oLub_while_fin, R_while_fin, Equiv_while_fin.
+  sets_unfold.
+  intros l H st.
+  split; intros.
+  + destruct H0 as [ [ n ? ] | ?].
+    - exists n; tauto.
+    - exists O; tauto.
+  + destruct H0 as [n [? | ? ] ].
+    - left.
+      exists n; tauto.
+    - tauto.
+Qed.
+
+Lemma union_right1_mono_and_continuous:
+  forall
+    (A: Type)
+    (Y: A -> Prop)
+    (f: (A -> Prop) -> (A -> Prop)),
+  mono f /\ continuous f ->
+  mono (fun X => f X ∪ Y) /\ continuous (fun X => f X ∪ Y).
+Proof.
+  intros.
+  destruct H.
+  pose proof union_right1_mono _ Y.
+  pose proof union_right1_continuous _ Y.
+  split.
+  + exact (compose_mono f _ H H1).
+  + exact (compose_continuous f _ H H1 H0 H2).
+Qed.
+
+(** 最后我们定义while循环语句运行出错的情况，并证明其确实是最小不动点。*)
+
+Module Lang8.
+
+Import WhileD_Expr Lang5 Lang6.
+
+Definition test_err
+             (D: prog_state -> int64 -> Prop)
+             (st: prog_state): Prop :=
+  forall n, ~ D st n.
+
+Definition while_denote_err
+             (D0: prog_state -> int64 -> Prop)
+             (Dfin: prog_state -> prog_state -> Prop)
+             (Derr: prog_state -> Prop):
+  prog_state -> Prop :=
+  BW_LFix (fun X => BinRel.dia (test1(D0) ∘ Dfin) X ∪
+                    BinRel.dia (test1(D0)) Derr ∪
+                    test_err(D0)).
+
+Theorem while_denote_err_is_least_fix: forall D0 Dfin Derr,
+  (BinRel.dia (test1(D0) ∘ Dfin) (while_denote_err D0 Dfin Derr) ∪
+   BinRel.dia (test1(D0)) Derr ∪
+   test_err(D0) ==
+   while_denote_err D0 Dfin Derr)%sets /\
+  (forall X,
+     BinRel.dia (test1(D0) ∘ Dfin) X ∪
+     BinRel.dia (test1(D0)) Derr ∪
+     test_err(D0) == X ->
+     while_denote_err D0 Dfin Derr ⊆ X)%sets.
+Proof.
+  intros.
+  assert (mono (fun X => BinRel.dia (test1(D0) ∘ Dfin) X ∪
+                         BinRel.dia (test1(D0)) Derr ∪
+                         test_err(D0)) /\
+          continuous (fun X => BinRel.dia (test1(D0) ∘ Dfin) X ∪
+                               BinRel.dia (test1(D0)) Derr ∪
+                               test_err(D0))).
+  {
+    apply union_right1_mono_and_continuous.
+    apply union_right1_mono_and_continuous.
+    apply BinRel_dia_left_mono_and_continuous.
+    split.
+    + apply id_mono.
+    + apply id_continuous.
+  }
+  destruct H.
+  split.
+  + apply (BW_LFix_is_fix (fun X => BinRel.dia (test1(D0) ∘ Dfin) X ∪
+                                    BinRel.dia (test1(D0)) Derr ∪
+                                    test_err(D0)));
+      tauto.
+  + intros X.
+    apply (BW_LFix_is_least_fix (fun X => BinRel.dia (test1(D0) ∘ Dfin) X ∪
+                                          BinRel.dia (test1(D0)) Derr ∪
+                                          test_err(D0)));
+      tauto.
+Qed.
+
+End Lang8.
+
+(** ** While循环语句不终止的情况 *)
+
+
+
+(** 下面是这一不动点定理的Coq证明。*)
+
+Local Open Scope order_scope.
+
+(** 首先定义完备格。*)
+Definition is_lub {A: Type} {RA: Order A} (X: A -> Prop) (a: A): Prop :=
+  is_ub X a /\ is_lb (is_ub X) a.
+
+Definition is_glb {A: Type} {RA: Order A} (X: A -> Prop) (a: A): Prop :=
+  is_lb X a /\ is_ub (is_lb X) a.
+
+Class Lub (A: Type): Type :=
+  lub: (A -> Prop) -> A.
+
+Class Glb (A: Type): Type :=
+  glb: (A -> Prop) -> A.
+
+Class LubProperty (A: Type) {RA: Order A} {LubA: Lub A}: Prop :=
+  lub_is_lub: forall X: A -> Prop, is_lub X (lub X).
+
+Class GlbProperty (A: Type) {RA: Order A} {GlbA: Glb A}: Prop :=
+  glb_is_glb: forall X: A -> Prop, is_glb X (glb X).
+
+Lemma glb_sound: forall {A: Type} `{GlbPA: GlbProperty A},
+  forall X: A -> Prop, is_lb X (glb X).
+Proof. intros. destruct (glb_is_glb X). tauto. Qed.
+
+Lemma glb_tight: forall {A: Type} `{GlbPA: GlbProperty A},
+  forall X: A -> Prop, is_ub (is_lb X) (glb X).
+Proof. intros. destruct (glb_is_glb X). tauto. Qed.
+
+Class CompleteLattice_Setoid (A: Type)
+        {RA: Order A} {EA: Equiv A} {LubA: Lub A} {glbA: Glb A}: Prop :=
+{
+  CL_PartialOrder:> PartialOrder_Setoid A;
+  CL_LubP:> LubProperty A;
+  CL_GlbP:> GlbProperty A
+}.
+
+(** 下面基于完备格与单调函数的定义证明Knaster-Tarski不动点定理。*)
+Definition KT_LFix
+             {A: Type}
+             `{CLA: CompleteLattice_Setoid A}
+             (f: A -> A): A :=
+  glb (fun a => f a <= a).
+
+Lemma KT_LFix_is_pre_fix:
+  forall
+    {A: Type}
+    `{CLA: CompleteLattice_Setoid A}
+    {EquivA: Equivalence equiv}
+    (f: A -> A),
+    mono f ->
+    f (KT_LFix f) <= KT_LFix f.
+Proof.
+  intros.
+  unfold KT_LFix.
+  apply glb_tight; unfold is_lb; intros.
+  rewrite <- H0.
+  apply H.
+  apply glb_sound.
+  apply H0.
+Qed.
+
+Lemma KT_LFix_is_fix:
+  forall
+    {A: Type}
+    `{CLA: CompleteLattice_Setoid A}
+    {EquivA: Equivalence equiv}
+    (f: A -> A),
+    mono f ->
+    f (KT_LFix f) == KT_LFix f.
+Proof.
+  intros.
+  pose proof KT_LFix_is_pre_fix f H.
+  apply antisymmetricity_setoid.
+  + apply H0.
+  + apply glb_sound.
+    apply H, H0.
+Qed.
+
+Lemma KT_LFix_is_least_fix:
+  forall
+    {A: Type}
+    `{CLA: CompleteLattice_Setoid A}
+    {EquivA: Equivalence equiv}
+    (f: A -> A)
+    (a: A),
+    mono f ->
+    f a == a ->
+    KT_LFix f <= a.
+Proof.
+  intros.
+  apply glb_sound.
+  apply reflexivity_setoid.
+  apply H0.
+Qed.
+
+Local Close Scope order_scope.
+
+(** 下面定义用于定义不动点的完备格。*)
+
+#[export] Instance R_while_inf {A: Type}: Order (A -> Prop) :=
+  (Basics.flip Sets.included).
+
+#[export] Instance Equiv_while_inf {A: Type}: Equiv (A -> Prop) :=
+  Sets.equiv.
+
+#[export] Instance PO_while_inf {A: Type}: PartialOrder_Setoid (A -> Prop).
+Proof.
+  split.
+  + unfold Reflexive_Setoid.
+    unfold Basics.flip, equiv, order_rel, R_while_inf, Equiv_while_inf; simpl.
+    sets_unfold; intros a b H x.
+    specialize (H x).
+    tauto.
+  + unfold Transitive.
+    unfold Basics.flip, equiv, order_rel, R_while_inf, Equiv_while_inf; simpl.
+    sets_unfold; intros a b c H H0 x.
+    specialize (H x).
+    specialize (H0 x).
+    tauto.
+  + unfold AntiSymmetric_Setoid.
+    unfold Basics.flip, equiv, order_rel, R_while_inf, Equiv_while_inf; simpl.
+    sets_unfold; intros a b H H0 x.
+    specialize (H x).
+    specialize (H0 x).
+    tauto.
+Qed.
+
+#[export] Instance Lub_while_inf {A: Type}: Lub (A -> Prop) :=
+  Sets.general_intersect.
+
+#[export] Instance Glb_while_inf {A: Type}: Glb (A -> Prop) :=
+  Sets.general_union.
+
+#[export] Instance LubP_while_inf {A: Type}: LubProperty (A -> Prop).
+Proof.
+  unfold LubProperty.
+  unfold is_lub, is_lb, is_ub.
+  unfold R_while_inf, order_rel, Lub_while_inf, lub, Basics.flip.
+  sets_unfold.
+  simpl.
+  split; intros.
+  + apply H0, H.
+  + specialize (H _ H1 _ H0).
+    apply H.
+Qed.
+
+#[export] Instance GlbP_while_inf {A: Type}: GlbProperty (A -> Prop).
+Proof.
+  unfold GlbProperty.
+  unfold is_glb, is_lb, is_ub.
+  unfold R_while_inf, order_rel, Glb_while_inf, glb, Basics.flip.
+  sets_unfold.
+  split; intros.
+  + exists a'.
+    tauto.
+  + destruct H0 as [? [? ?] ].
+    specialize (H _ H0 _ H1).
+    apply H.
+Qed.
+
+#[export] Instance CL_while_inf {A: Type}:
+  CompleteLattice_Setoid (A -> Prop).
+Proof.
+  split.
+  + apply PO_while_inf.
+  + apply LubP_while_inf.
+  + apply GlbP_while_inf.
+Qed.
+
+Lemma BinRel_dia_left__mono:
+  forall (A B: Type) (Y: A -> B -> Prop),
+    mono (fun X: B -> Prop => BinRel.dia Y X).
+Proof.
+  intros.
+  unfold mono.
+  unfold order_rel, R_while_inf.
+  intros.
+  apply BinRel_dia_included_congr.
+  + reflexivity.
+  + apply H.
+Qed.
+
+Lemma BinRel_dia_left_compose_mono:
+  forall
+    (A B: Type)
+    (Y: A -> B -> Prop)
+    (f: (B -> Prop) -> (B -> Prop)),
+  mono f ->
+  mono (fun X => BinRel.dia Y (f X)).
+Proof.
+  intros.
+  pose proof BinRel_dia_left__mono _ _ Y.
+  exact (compose_mono f _ H H0).
+Qed.
+
+Lemma union_right1__mono:
+  forall (A: Type) (Y: A -> Prop),
+    mono (fun X => X ∪ Y).
+Proof.
+  intros.
+  unfold mono.
+  unfold order_rel, R_while_inf, Basics.flip.
+  sets_unfold.
+  intros R R' H st.
+  specialize (H st).
+  tauto.
+Qed.
+
+Lemma union_right1_compose_mono:
+  forall
+    (A: Type)
+    (Y: A -> Prop)
+    (f: (A -> Prop) -> (A -> Prop)),
+  mono f ->
+  mono (fun X => f X ∪ Y).
+Proof.
+  intros.
+  pose proof union_right1__mono _ Y.
+  exact (compose_mono f _ H H0).
+Qed.
+
+Module Lang9.
+
+Import WhileD_Expr Lang5 Lang6 Lang7 Lang8.
+
+Definition while_denote_inf
+             (D0: prog_state -> int64 -> Prop)
+             (Dfin: prog_state -> prog_state -> Prop)
+             (Dinf: prog_state -> Prop):
+  prog_state -> Prop :=
+  KT_LFix (fun X => BinRel.dia (test1(D0) ∘ Dfin) X ∪
+                    BinRel.dia (test1(D0)) Dinf).
+
+Theorem while_denote_inf_is_greatest_fix: forall D0 Dfin Dinf,
+  (BinRel.dia (test1(D0) ∘ Dfin) (while_denote_inf D0 Dfin Dinf) ∪
+   BinRel.dia (test1(D0)) Dinf ==
+   while_denote_inf D0 Dfin Dinf)%sets /\
+  (forall X,
+     BinRel.dia (test1(D0) ∘ Dfin) X ∪
+     BinRel.dia (test1(D0)) Dinf == X ->
+     X ⊆ while_denote_inf D0 Dfin Dinf)%sets.
+Proof.
+  intros.
+  assert (mono (fun X => BinRel.dia (test1(D0) ∘ Dfin) X ∪
+                         BinRel.dia (test1(D0)) Dinf)).
+  {
+    apply union_right1_compose_mono.
+    apply BinRel_dia_left_compose_mono.
+    apply id_mono.
+  }
+  split.
+  + apply (KT_LFix_is_fix (fun X => BinRel.dia (test1(D0) ∘ Dfin) X ∪
+                                    BinRel.dia (test1(D0)) Dinf));
+      tauto.
+  + intros X.
+    unfold while_denote_inf.
+    exact (KT_LFix_is_least_fix
+             (fun X => BinRel.dia (test1(D0) ∘ Dfin) X ∪
+                       BinRel.dia (test1(D0)) Dinf)
+             X
+             H).
+Qed.
+
+End Lang9.
+
+
+
+
+
+
+
+
+
+(** ** 小结 *)
+
+(** 所有的程序语句的语义整理如下：*)
+
+Module WhileD_Cmd.
+
+Import WhileD_Expr.
+
+Inductive com : Type :=
+  | CAss (e1 e2: expr): com
+  | CSeq (c1 c2: com): com
+  | CIf (e: expr) (c1 c2: com): com
+  | CWhile (e: expr) (c: com): com.
+
+Definition test0
+             (D: prog_state -> int64 -> Prop)
+             (st1 st2: prog_state): Prop :=
+  st1 = st2 /\ D st1 (Int64.repr 0).
+
+Definition test1
+             (D: prog_state -> int64 -> Prop)
+             (st1 st2: prog_state): Prop :=
+  exists n, st1 = st2 /\ D st1 n /\ Int64.unsigned n <> 0.
+
+Definition test_err
+             (D: prog_state -> int64 -> Prop)
+             (st: prog_state): Prop :=
+  forall n, ~ D st n.
+
+Record cmd_denote: Type := {
+  fin: prog_state -> prog_state -> Prop;
+  err: prog_state -> Prop;
+  inf: prog_state -> Prop
+}.
+
+Definition asgn_var_denote
+             (X: var_name)
+             (D: prog_state -> int64 -> Prop): cmd_denote :=
+  {|
+    fin := fun st1 st2 =>
+      exists n,
+        D st1 n /\
+        st2.(vars) X = n /\
+        (forall Y, X <> Y -> st1.(vars) Y = st2.(vars) Y) /\
+        (forall p, st1.(mem) p = st2.(mem) p);
+    err := fun st =>
+      forall n, ~ D st n;
+    inf := fun st =>
+      False
+  |}.
+
+Definition asgn_deref_denote
+             (D1 D2: prog_state -> int64 -> Prop): cmd_denote :=
+  {|
+    fin := fun st1 st2 =>
+      exists p n,
+        D1 st1 p /\
+        D2 st1 n /\
+        st1.(mem) p <> None /\
+        st2.(mem) p = Some n /\
+        (forall X, st1.(vars) X = st2.(vars) X) /\
+        (forall q, p <> q -> st1.(mem) q = st2.(mem) q);
+    err := fun st =>
+      (forall n, ~ D1 st n) \/
+      (forall n, ~ D2 st n) \/
+      (exists p, D1 st p /\ st.(mem) p = None);
+    inf := fun st =>
+      False
+  |}.
+
+Definition seq_denote (D1 D2: cmd_denote): cmd_denote :=
+  {|
+    fin := D1.(fin) ∘ D2.(fin);
+    err := D1.(err) ∪ (BinRel.dia D1.(fin) D2.(err));
+    inf := D1.(inf) ∪ (BinRel.dia D1.(fin) D2.(inf))
+  |}.
+
+Definition if_denote
+             (D0: prog_state -> int64 -> Prop)
+             (D1 D2: cmd_denote): cmd_denote :=
+  {|
+    fin := (test1(D0) ∘ D1.(fin)) ∪ (test0(D0) ∘ D2.(fin));
+    err := test_err D0 ∪
+           (BinRel.dia (test1 D0) D1.(err)) ∪
+           (BinRel.dia (test0 D0) D2.(err));
+    inf := (BinRel.dia (test1 D0) D1.(inf)) ∪
+           (BinRel.dia (test0 D0) D2.(inf))
+  |}.
+
+Definition while_denote
+             (D0: prog_state -> int64 -> Prop)
+             (D: cmd_denote): cmd_denote :=
+  {|
+    fin := BW_LFix (fun X => (test1 D0 ∘ D.(fin) ∘ X) ∪ test0 D0);
+    err := BW_LFix (fun X => BinRel.dia (test1 D0 ∘ D.(fin)) X ∪
+                             BinRel.dia (test1 D0) D.(err) ∪
+                             test_err(D0));
+    inf := KT_LFix (fun X => BinRel.dia (test1 D0 ∘ D.(fin)) X ∪
+                             BinRel.dia (test1 D0) D.(inf))
+  |}.
+
+Fixpoint ceval (c: com): cmd_denote :=
+  match c with
+  | CAss e1 e2 =>
+    match e1 with
+    | EVar X => asgn_var_denote X (eeval e2)
+    | EDeref e0 => asgn_deref_denote (eeval e0) (eeval e2)
+    | _ => {| fin := ∅; err := ∅; inf := ∅ |}
+    end
+  | CSeq c1 c2 => seq_denote (ceval c1) (ceval c2)
+  | CIf e c1 c2 => if_denote (eeval e) (ceval c1) (ceval c2)
+  | CWhile e c0 => while_denote (eeval e) (ceval c0)
+  end.
+
+End WhileD_Cmd.
 
