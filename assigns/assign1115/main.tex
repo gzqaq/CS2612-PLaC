@@ -1,0 +1,93 @@
+\documentclass[11pt]{article}
+
+\usepackage{geometry}
+\geometry{a4paper}
+
+\usepackage{graphicx}
+\usepackage{caption}
+
+\usepackage{ctex}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{stmaryrd}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+
+\lstset{
+  basicstyle=\footnotesize\ttfamily,
+  frame=single,
+  framerule=0pt,
+  backgroundcolor=\color{gray!15},
+  xleftmargin=2em,
+}
+
+\newcommand{\iv}{\texttt{IV}}
+
+
+\title{Assignment 1115}
+\author{Ziqin Gong $\quad$ 520030910216}
+\date{}
+
+\begin{document}
+  \maketitle
+
+  \section*{1}
+
+    记\texttt{IV}=\texttt{listrep(x)}。首先证明\iv 为循环不变量。显然\iv 可以推出
+    \texttt{x}求值安全。那么
+
+    \begin{lstlisting}
+{ IV && x } ===
+{ exists x'. x == x' && listrep(x') && x' != 0 } ===
+{ exists x' u v. x == x' && x' != 0 && store(x', u) * store(x' + 8, v) *
+                                       listrep(v) }
+x = * (x + 8)
+{ exists x' u v. x == v && x' != 0 && store(x', u) * store(x' + 8, v) *
+                                      listrep(v) } which implies
+{ exists v. x == v && listrep(v) } ===
+{ listrep(x) } === { IV }
+    \end{lstlisting}
+
+    因此\iv 是循环不变量。注意到前条件可推出\iv，且\texttt{IV \&\& x == 0}可以推出
+    后条件，故由Consequence Rule可证该三元组成立。
+
+  \section*{2}
+
+    记\iv=\texttt{array0(x, i) * array(x + 8 * i, n - i) \&\& 0 <= i <= n}。显然
+    \iv 保证求值安全。
+
+    \begin{lstlisting}
+{ IV && i < n } ===
+{ exists x' i' u. x == x' && i == i' && 0 <= i' < n &&
+                  [i' == 0 || store(x', 0) * array0(x' + 8, i' - 1)] &&
+                  store(x' + 8 * i', u) * array(x' + 8 * (i'+1), n-i'-1) }
+* (x + i * 8 ) = 0
+{ exists x' i' u. x == x' && i == i' && 0 <= i' < n &&
+                  [i' == 0 || store(x', 0) * array0(x' + 8, i' - 1)] &&
+                  store(x' + 8 * i', 0) * array(x' + 8 * (i'+1), n-i'-1) }
+===
+{ exists x' i' u. x == x' && i == i' && 0 <= i' < n &&
+                  [i' == 0 || store(x', 0) * array0(x' + 8, i')] *
+                  array(x' + 8 * (i' + 1), n - i' - 1) }
+i = i + 1
+{ exists x' i' u. x == x' && i == i' + 1 && 0 <= i' < n &&
+                  [i' == 0 || store(x', 0) * array0(x' + 8, i')] *
+                  array(x' + 8 * (i' + 1), n - i' - 1) }
+===
+{ exists x' i' u. x == x' && i == i' && 0 < i' <= n &&
+                  store(x', 0) * array0(x' + 8, i' - 1) *
+                  array(x' + 8 * i', n - i') }
+===
+{ array0(x, i) * array(x + 8 * i, n - i) && 0 < i <= n } which implies
+{ IV }
+    \end{lstlisting}
+
+    因此\iv 是循环不变量。注意到前条件可推出\iv，且\texttt{IV \&\& i >= n}可推出
+    后条件，故由Consequence Rule可证该三元组成立。
+
+\end{document}
