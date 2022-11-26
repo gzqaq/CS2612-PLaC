@@ -16,11 +16,24 @@ Class SETS (T: Type): Type :=
   union: T -> T -> T;
   omega_intersect: (nat -> T) -> T;
   omega_union: (nat -> T) -> T;
-  general_intersect: (T -> Prop) -> T;
-  general_union: (T -> Prop) -> T;
   equiv: T -> T -> Prop;
   included: T -> T -> Prop;
+  Taux: Type -> Type;
+  Qaux: forall T0, (T0 -> Prop) -> Taux T0;
+  Paux: forall T0, (T0 -> T) -> Taux T0;
+  conj_aux: forall T0, Taux T0 -> Taux T0 -> Taux T0;
+  imply_aux: forall T0, Taux T0 -> Taux T0 -> Taux T0;
+  forall_aux: forall T0, Taux T0 -> T;
+  exists_aux: forall T0, Taux T0 -> T;
+  inj_aux: forall T0, T -> Taux T0;
+  derives_aux: forall T0, Taux T0 -> Taux T0 -> T0 -> Prop
 }.
+
+Definition general_union {T} {_SETS: SETS T}: (T -> Prop) -> T :=
+  fun P => exists_aux T (conj_aux T (Qaux T P) (Paux T (fun x => x))).
+
+Definition general_intersect {T} {_SETS: SETS T}: (T -> Prop) -> T :=
+  fun P => forall_aux T (imply_aux T (Qaux T P) (Paux T (fun x => x))).
 
 Definition complement {A: Type} (X: A -> Prop) := fun a => ~ X a.
 
@@ -43,17 +56,46 @@ Definition lift_omega_intersect {A B} {_SETS: SETS B}: (nat -> A -> B) -> (A -> 
 Definition lift_omega_union {A B} {_SETS: SETS B}: (nat -> A -> B) -> (A -> B) :=
   fun x a => omega_union (fun n => x n a).
 
-Definition lift_general_intersect {A B} {_SETS: SETS B}: ((A -> B) -> Prop) -> (A -> B) :=
-  fun x a => general_intersect (fun b => exists f, x f /\ f a = b).
-
-Definition lift_general_union {A B} {_SETS: SETS B}: ((A -> B) -> Prop) -> (A -> B) :=
-  fun x a => general_union (fun b => exists f, x f /\ f a = b).
-
 Definition lift_equiv {A B} {_SETS: SETS B}: (A -> B) -> (A -> B) -> Prop :=
   fun x y => forall a, equiv (x a) (y a).
 
 Definition lift_included {A B} {_SETS: SETS B}: (A -> B) -> (A -> B) -> Prop :=
   fun x y => forall a, included (x a) (y a).
+
+Definition lift_Taux {A B} {_SETS: SETS B}: Type -> Type :=
+  fun T => A -> Taux T.
+
+Definition lift_Qaux {A B} {_SETS: SETS B}:
+  forall T0, (T0 -> Prop) -> A -> Taux T0 := 
+  fun T0 X _ => Qaux T0 X.
+
+Definition lift_Paux {A B} {_SETS: SETS B}:
+  forall T0, (T0 -> (A -> B)) -> A -> Taux T0 := 
+  fun T0 inj a => Paux T0 (fun t => inj t a).
+  
+Definition lift_conj_aux {A B} {_SETS: SETS B}:
+  forall T0, (A -> Taux T0) -> (A -> Taux T0) -> (A -> Taux T0) := 
+  fun T0 x y a => conj_aux T0 (x a) (y a).
+
+Definition lift_imply_aux {A B} {_SETS: SETS B}:
+  forall T0, (A -> Taux T0) -> (A -> Taux T0) -> (A -> Taux T0) := 
+  fun T0 x y a => imply_aux T0 (x a) (y a).
+
+Definition lift_forall_aux {A B} {_SETS: SETS B}:
+  forall T0, (A -> Taux T0) -> (A -> B) := 
+  fun T0 x a => forall_aux T0 (x a).
+
+Definition lift_exists_aux {A B} {_SETS: SETS B}:
+  forall T0, (A -> Taux T0) -> (A -> B) := 
+  fun T0 x a => exists_aux T0 (x a).
+
+Definition lift_derives_aux {A B} {_SETS: SETS B}:
+  forall T0, (A -> Taux T0) -> (A -> Taux T0) -> T0 -> Prop := 
+  fun T0 x y t0 => forall a, derives_aux T0 (x a) (y a) t0.
+
+Definition lift_inj_aux {A B} {_SETS: SETS B}:
+  forall T0, (A -> B) -> (A -> Taux T0) := 
+  fun T0 x a => inj_aux T0 (x a).
 
 Definition test1 {A B} {_SETS: SETS B}: (A -> Prop) -> (A -> B) :=
   fun P a => prop_inj (P a).
@@ -96,10 +138,17 @@ Arguments Sets.In: simpl never.
     Sets.union := or;
     Sets.omega_intersect := fun P => forall n, P n;
     Sets.omega_union := (@ex _);
-    Sets.general_intersect := fun S => forall P, S P -> P;
-    Sets.general_union := fun S => exists P, S P /\ P;
     Sets.equiv := iff;
-    Sets.included := fun P Q => P -> Q
+    Sets.included := fun P Q => P -> Q;
+    Sets.Taux := fun T => T -> Prop;
+    Sets.Qaux := fun T0 X P => X P;
+    Sets.Paux := fun T0 inj P => inj P;
+    Sets.conj_aux := fun T0 x y a => x a /\ y a;
+    Sets.imply_aux := fun T0 x y a => x a -> y a;
+    Sets.forall_aux := fun T0 P => forall x, P x;
+    Sets.exists_aux := fun T0 P => exists x, P x;
+    Sets.inj_aux := fun T0 P _ => P;
+    Sets.derives_aux := fun T0 x y t0 => x t0 -> y t0
   |}.
 
 #[export] Instance lift_SETS (A B: Type) (_SETS: Sets.SETS B): Sets.SETS (A -> B) :=
@@ -111,10 +160,17 @@ Arguments Sets.In: simpl never.
     Sets.union := Sets.lift_union;
     Sets.omega_intersect := Sets.lift_omega_intersect;
     Sets.omega_union := Sets.lift_omega_union;
-    Sets.general_intersect := Sets.lift_general_intersect;
-    Sets.general_union := Sets.lift_general_union;
     Sets.equiv := Sets.lift_equiv;
-    Sets.included := Sets.lift_included
+    Sets.included := Sets.lift_included;
+    Sets.Taux := @Sets.lift_Taux A B _;
+    Sets.Qaux := Sets.lift_Qaux;
+    Sets.Paux := Sets.lift_Paux;
+    Sets.conj_aux := Sets.lift_conj_aux;
+    Sets.imply_aux := Sets.lift_imply_aux;
+    Sets.forall_aux := Sets.lift_forall_aux;
+    Sets.exists_aux := Sets.lift_exists_aux;
+    Sets.inj_aux := Sets.lift_inj_aux;
+    Sets.derives_aux := Sets.lift_derives_aux
   |}.
 
 Ltac SETS_unfold1 SETS :=
@@ -143,10 +199,17 @@ Ltac SETS_simplify T :=
                Sets.union
                Sets.omega_intersect
                Sets.omega_union
+               Sets.equiv
+               Sets.included
                Sets.general_intersect
                Sets.general_union
-               Sets.equiv
-               Sets.included] in op in
+               Sets.Taux
+               Sets.Qaux
+               Sets.Paux
+               Sets.conj_aux
+               Sets.imply_aux
+               Sets.forall_aux
+               Sets.exists_aux] in op in
         let SETS1 := SETS_unfold1 SETS in
         let T1 := eval cbv beta zeta iota in
               (op1 A SETS1) in
@@ -158,10 +221,15 @@ Ltac SETS_simplify T :=
                Sets.lift_union
                Sets.lift_omega_intersect
                Sets.lift_omega_union
-               Sets.lift_general_intersect
-               Sets.lift_general_union
                Sets.lift_equiv
-               Sets.lift_included] in T1 in
+               Sets.lift_included
+               Sets.lift_Taux
+               Sets.lift_Qaux
+               Sets.lift_Paux
+               Sets.lift_conj_aux
+               Sets.lift_imply_aux
+               Sets.lift_forall_aux
+               Sets.lift_exists_aux] in T1 in
         change T with T2;
         try SETS_simplify T2
       end
@@ -201,6 +269,20 @@ Ltac unfold_SETS_tac :=
          SETS_simplify (@Sets.general_intersect T _SETS)
   | |- context [@Sets.general_union ?T ?_SETS] =>
          SETS_simplify (@Sets.general_union T _SETS)
+  | |- context [@Sets.Taux ?T ?_SETS] =>
+         SETS_simplify (@Sets.Taux T _SETS)
+  | |- context [@Sets.Paux ?T ?_SETS] =>
+         SETS_simplify (@Sets.Paux T _SETS)
+  | |- context [@Sets.Qaux ?T ?_SETS] =>
+         SETS_simplify (@Sets.Qaux T _SETS)
+  | |- context [@Sets.conj_aux ?T ?_SETS] =>
+         SETS_simplify (@Sets.conj_aux T _SETS)
+  | |- context [@Sets.imply_aux ?T ?_SETS] =>
+         SETS_simplify (@Sets.imply_aux T _SETS)
+  | |- context [@Sets.exists_aux ?T ?_SETS] =>
+         SETS_simplify (@Sets.exists_aux T _SETS)
+  | |- context [@Sets.forall_aux ?T ?_SETS] =>
+         SETS_simplify (@Sets.forall_aux T _SETS)
   | |- context [@Sets.included ?T ?_SETS] =>
          SETS_simplify (@Sets.included T _SETS)
   | |- context [@Sets.filter1 ?A ?T ?_SETS] =>
@@ -229,13 +311,87 @@ Class SETS_Properties (T: Type) {_SETS: Sets.SETS T}: Prop :=
   Sets_omega_union_included: forall xs y, (forall n, Sets.included (xs n) y) -> Sets.included (Sets.omega_union xs) y;
   Sets_omega_intersect_included: forall xs n, Sets.included (Sets.omega_intersect xs) (xs n);
   Sets_included_omega_intersect: forall xs y, (forall n, Sets.included y (xs n)) -> Sets.included y (Sets.omega_intersect xs);
-  Sets_included_general_union: forall (xs: _ -> Prop) x, xs x -> Sets.included x (Sets.general_union xs);
-  Sets_general_union_included: forall (xs: _ -> Prop) y, (forall x, xs x -> Sets.included x y) -> Sets.included (Sets.general_union xs) y;
+  Sets_included_derives_aux: forall T0 x y t0, Sets.included x y -> Sets.derives_aux T0 (Sets.inj_aux T0 x) (Sets.inj_aux T0 y) t0;
+  Sets_derives_aux_trans: forall T0 t0, Transitive (fun x y => Sets.derives_aux T0 x y t0);
+  Sets_Qaux_right: forall T0 t0 (Pr: T0 -> Prop) P,
+    Pr t0 ->
+    Sets.derives_aux T0 P (Sets.Qaux T0 Pr) t0;
+  Sets_Paux_left: forall T0 t0 (inj: T0 -> T),
+    Sets.derives_aux T0 (Sets.Paux T0 inj) (Sets.inj_aux T0 (inj t0)) t0;
+  Sets_Paux_right: forall T0 t0 (inj: T0 -> T),
+    Sets.derives_aux T0 (Sets.inj_aux T0 (inj t0)) (Sets.Paux T0 inj) t0;
+  Sets_Qaux_left_extract: forall T0 t0 (Pr: T0 -> Prop) Q1 Q2,
+    (Pr t0 -> Sets.derives_aux T0 Q1 Q2 t0) ->
+    Sets.derives_aux T0 (Sets.conj_aux T0 (Sets.Qaux T0 Pr) Q1) Q2 t0;
+  Sets_Qaux_right_extract: forall T0 t0 (Pr: T0 -> Prop) Q1 Q2,
+    (Pr t0 -> Sets.derives_aux T0 Q1 Q2 t0) ->
+    Sets.derives_aux T0 Q1 (Sets.imply_aux T0 (Sets.Qaux T0 Pr) Q2) t0;
+  Sets_Qaux_implies_left: forall T0 t0 (Pr: T0 -> Prop) Q1 Q2,
+    Pr t0 ->
+    Sets.derives_aux T0 Q1 Q2 t0 ->
+    Sets.derives_aux T0 (Sets.imply_aux T0 (Sets.Qaux T0 Pr) Q1) Q2 t0;
+  Sets_conj_aux_right: forall T0 t0 P Q1 Q2,
+    Sets.derives_aux T0 P Q1 t0 ->
+    Sets.derives_aux T0 P Q2 t0 ->
+    Sets.derives_aux T0 P (Sets.conj_aux T0 Q1 Q2) t0;
+  Sets_exists_aux_left: forall T0 P Q,
+    (forall t0, Sets.derives_aux T0 Q (Sets.inj_aux T0 P) t0) ->
+    Sets.included (Sets.exists_aux T0 Q) P;
+  Sets_exists_aux_right: forall T0 t0 P Q,
+    Sets.derives_aux T0 (Sets.inj_aux T0 P) Q t0 ->
+    Sets.included P (Sets.exists_aux T0 Q);
+  Sets_forall_aux_left: forall T0 t0 P Q,
+    Sets.derives_aux T0 Q (Sets.inj_aux T0 P) t0 ->
+    Sets.included (Sets.forall_aux T0 Q) P;
+  Sets_forall_aux_right: forall T0 P Q,
+    (forall t0, Sets.derives_aux T0 (Sets.inj_aux T0 P) Q t0) ->
+    Sets.included P (Sets.forall_aux T0 Q);
+}.
+(*
   Sets_general_intersect_included: forall (xs: _ -> Prop) x, xs x -> Sets.included (Sets.general_intersect xs) x;
   Sets_included_general_intersect: forall (xs: _ -> Prop) y, (forall x, xs x -> Sets.included y x) -> Sets.included y (Sets.general_intersect xs);
-}.
 
+*)
 #[export] Existing Instances Sets_included_refl Sets_included_trans.
+
+Lemma Sets_included_general_union: forall {T} {_SETS: Sets.SETS T} {_SETS_Properties: SETS_Properties T} (xs: _ -> Prop) x, xs x -> Sets.included x (Sets.general_union xs).
+Proof.
+  intros.
+  apply Sets_exists_aux_right with x.
+  apply Sets_conj_aux_right.
+  + apply Sets_Qaux_right; auto.
+  + apply (Sets_Paux_right T x (fun x => x)).
+Qed.
+
+Lemma Sets_general_union_included: forall {T} {_SETS: Sets.SETS T} {_SETS_Properties: SETS_Properties T} (xs: _ -> Prop) y, (forall x, xs x -> Sets.included x y) -> Sets.included (Sets.general_union xs) y.
+Proof.
+  intros.
+  apply Sets_exists_aux_left; intros.
+  apply Sets_Qaux_left_extract; intros.
+  apply H in H0.
+  eapply (Sets_included_derives_aux T) in H0.
+  eapply Sets_derives_aux_trans; eauto.
+  apply (Sets_Paux_left T t0 (fun x => x)).
+Qed.
+
+Lemma Sets_general_intersect_included: forall {T} {_SETS: Sets.SETS T} {_SETS_Properties: SETS_Properties T} (xs: _ -> Prop) x, xs x -> Sets.included (Sets.general_intersect xs) x.
+Proof.
+  intros.
+  apply Sets_forall_aux_left with x.
+  apply Sets_Qaux_implies_left; auto.
+  apply (Sets_Paux_left T x (fun x => x)).
+Qed.
+
+Lemma Sets_included_general_intersect: forall {T} {_SETS: Sets.SETS T} {_SETS_Properties: SETS_Properties T} (xs: _ -> Prop) y, (forall x, xs x -> Sets.included y x) -> Sets.included y (Sets.general_intersect xs).
+Proof.
+  intros.
+  apply Sets_forall_aux_right; intros.
+  apply Sets_Qaux_right_extract; intros.
+  apply H in H0.
+  eapply (Sets_included_derives_aux T) in H0.
+  eapply Sets_derives_aux_trans; eauto.
+  apply (Sets_Paux_right T t0 (fun x => x)).
+Qed.
 
 Lemma Sets_filter1_defn: forall {S T} {_SETS: Sets.SETS T} (P: S -> Prop) (Q: S -> T),
   Sets.filter1 P Q = Sets.intersect (Sets.test1 P) Q.
@@ -652,6 +808,7 @@ Proof.
   + firstorder.
   + firstorder.
   + firstorder.
+  + firstorder.
 Qed.
 
 #[export] Instance lift_SETS_Properties (A B: Type) (_SETS: Sets.SETS B) (_SETS_Properties: SETS_Properties B): SETS_Properties (A -> B).
@@ -682,18 +839,38 @@ Proof.
   + apply (Sets_omega_intersect_included (fun n => xs n a)).
   + apply (Sets_included_omega_intersect (fun n => xs n a)).
     auto.
-  + apply Sets_included_general_union.
-    exists x; auto.
-  + apply Sets_general_union_included.
-    intros ? [? [? ?]].
-    subst.
+  + intros a.
+    apply Sets_included_derives_aux; auto.
+  + intros ? ? ? ? ? a.
+    eapply Sets_derives_aux_trans; auto.
+  + intros a.
+    apply Sets_Qaux_right.
     auto.
-  + apply Sets_general_intersect_included.
-    exists x; auto.
-  + apply Sets_included_general_intersect.
-    intros ? [? [? ?]].
-    subst.
-    auto.
+  + intros a.
+    apply (Sets_Paux_left T0 t0 (fun t => inj t a)).
+  + intros a.
+    simpl.
+    unfold Sets.lift_inj_aux.
+    unfold Sets.lift_Paux.
+    exact (Sets_Paux_right T0 t0 (fun t => inj t a)).
+  + intros a.
+    apply Sets_Qaux_left_extract.
+    intros; apply H; auto.
+  + intros a.
+    apply Sets_Qaux_right_extract.
+    intros; apply H; auto.
+  + intros a.
+    apply Sets_Qaux_implies_left; auto.
+  + intros a.
+    apply Sets_conj_aux_right; auto.
+  + apply Sets_exists_aux_left.
+    intros; apply H; auto.
+  + apply (Sets_exists_aux_right _ t0).
+    apply H.
+  + apply (Sets_forall_aux_left _ t0).
+    apply H.
+  + apply Sets_forall_aux_right.
+    intros; apply H; auto.
 Qed.
 
 #[export] Instance Sets_prop_inj_mono {T} {_SETS: Sets.SETS T} {_SETS_Properties: SETS_Properties T}: Proper (Sets.included ==> Sets.included) (@Sets.prop_inj T _).

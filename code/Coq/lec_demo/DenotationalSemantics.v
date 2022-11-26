@@ -640,15 +640,12 @@ Definition minustwo (x: Z): Z := x - 2.
 Example fact_doit3times_1:
   doit3times minustwo 9 = 3.
 Proof. reflexivity. Qed.
-
 Example fact_doit3times_2:
   doit3times minustwo (doit3times minustwo 9) = -3.
 Proof. reflexivity. Qed.
-
 Example fact_doit3times_3:
   doit3times (doit3times minustwo) 9 = -9.
 Proof. reflexivity. Qed.
-
 Example fact_doit3times_4:
   doit3times doit3times minustwo 9 = -45.
 Proof. reflexivity. Qed.
@@ -669,21 +666,41 @@ Proof. reflexivity. Qed.
 Example fact_doit3times_anon3:
   doit3times (fun x => - x) 5 = -5.
 Proof. reflexivity. Qed.
-
 Example fact_doit3times_anon4:
   doit3times (fun f x y => f y x) (fun x y => x - y) 1 2 = 1.
 Proof. reflexivity. Qed.
-
 Definition Func_add {A: Type}: (A -> Z) -> (A -> Z) -> (A -> Z) :=
   fun f g x => f x + g x.
 
 Example fact_doit3times_anon5: forall x,
   doit3times (Func_add minustwo) (fun x => x * x) x = x * x + x * 3 - 6.
 Proof. intros. unfold doit3times, Func_add, minustwo. lia. Qed.
-
 Example fact_doit3times_anon6:
   doit3times ((fun x y => y * y - x * y + x * x) 1) 1 = 1.
 Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -756,6 +773,8 @@ Fixpoint eeval (e : expr) : prog_state -> int64 -> Prop :=
 
 
 
+
+
 End Lang4.
 
 
@@ -763,7 +782,7 @@ End Lang4.
 (** ** 方案五 *)
 
 (** 到目前为止，我们考虑了极简的只包含加减乘算术运算的表达式的指称语义。其实，基
-   于上面的方案，我们很容易就可以定义大小比较、布尔运算以及地址取值的语义。*)
+    于上面的方案，我们很容易就可以定义大小比较、布尔运算以及地址取值的语义。*)
 
 
 
