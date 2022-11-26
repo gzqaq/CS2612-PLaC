@@ -1,0 +1,140 @@
+\documentclass[11pt]{article}
+
+\usepackage{geometry}
+\geometry{a4paper}
+
+\usepackage{graphicx}
+\usepackage{caption}
+
+\usepackage{ctex}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{stmaryrd}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+
+\lstset{
+  basicstyle=\footnotesize\ttfamily,
+  frame=single,
+  framerule=0pt,
+  backgroundcolor=\color{gray!15},
+  xleftmargin=2em,
+}
+
+
+\title{Assignment 1111}
+\author{Ziqin Gong $\quad$ 520030910216}
+\date{}
+
+\begin{document}
+  \maketitle
+
+  \section*{1}
+
+    \begin{lstlisting}
+exists x'. x == 0 && 100 <= x' + y + z && x' <= 0
+    \end{lstlisting}
+
+  \section*{2}
+
+    \begin{lstlisting}
+exists x'. x == x' + y && 0 <= x' + y <= 100 && x' * y <= 100
+    \end{lstlisting}
+
+  \section*{3}
+
+    \begin{lstlisting}
+exists x' y'. y == x - y' && x' == m && y' == n && x == x' + n
+    \end{lstlisting}
+
+  \section*{4}
+
+    \subsection*{(1)}
+
+      \begin{lstlisting}
+exists v. store(x, u + 1) * store(x + 8, v) * listrep(v)
+      \end{lstlisting}
+
+    \subsection*{(2)}
+
+      记$P=\ $\texttt{listrep(x)}，$e=\ $\texttt{x != 0 \&\& * x <= 0}，
+      $Q=\ $\texttt{listrep(x)}。则
+      \begin{lstlisting}
+{P && e} ==
+{exists u v. store(x, u) * store(x + 8, v) * listrep(v) &&
+             x != 0 && u <= 0}
+* x = * x + 1
+{exists u v. store(x, u+1) * store(x + 8, v) * listrep(v) &&
+             x != 0 && u <= 0} which implies
+{exists u v. store(x, u) * store(x + 8, v) * listrep(v)}
+== {listrep(x)}
+      \end{lstlisting}
+      \begin{lstlisting}
+{P && !e} ==
+{exists u v. store(x, u) * store(x + 8, v) * listrep(v) &&
+             (x == 0 || * x > 0)}
+x = x
+{exists u v. store(x, u) * store(x + 8, v) * listrep(v) &&
+             (x == 0 || * x > 0)} which implies
+{listrep(x)}
+      \end{lstlisting}
+
+      因此，由Consequence Rule可得:
+
+      \begin{center}
+        $\{\ P\ \&\&\ e\ \}\ $\texttt{* x = * x + 1}$\ \{\ Q\ \}$
+
+        $\{\ P\ \&\&\ !e\ \}\ $\texttt{x = x}$\ \{\ Q\ \}$
+      \end{center}
+
+      故原霍尔三元组成立。
+
+    \subsection*{(3)}
+
+      记$P=Q=\ $\texttt{listrep(x) * listrep(y)}, $e=\ $\texttt{x != 0}。
+      \begin{lstlisting}
+{P && e} ==
+{exists u v. x != 0 && store(x, u) * store(x + 8, v) * listrep(v) *
+             listrep(y)}
+t = x
+{exists u v. t == x && x != 0 && store(x, u) * store(x + 8, v) *
+             listrep(v) * listrep(y)}
+x = * (x + 8)
+{exists u v x'. x == v && t == x' && x' != 0 && store(x', u) *
+                store(x' + 8, v) * listrep(v) * listrep(y)}
+化简:
+{exists u v. x == v && t != 0 && store(t, u) * store(t + 8, v) *
+             listrep(v) * listrep(y)}
+* (t + 8) = y
+{exists u v. x == v && t != 0 && store(t, u) * store(t + 8, y) *
+             listrep(v) * listrep(y)}
+y = t
+{exists u v y'. y == t && x == v && t != 0 && store(t, u) *
+                store(t + 8, y') * listrep(v) * listrep(y')}
+化简:
+{exists u y'. y != 0 && store(y, u) * store(y + 8, y') * listrep(y') *
+              listrep(x)}
+== {listrep(x) * listrep(y)} == { Q }
+      \end{lstlisting}
+      \begin{lstlisting}
+{P && !e} == {x == 0 && listrep(y)}
+x = x
+{x == 0 && listrep(y)} == { Q }
+      \end{lstlisting}
+
+      因此，由Consequence Rule可得:
+
+      \begin{center}
+        $\{\ P\ \&\&\ e\ \}\ $\texttt{t = x; x = * (x + 8); * (t + 8) = y; y = t}$\ \{\ Q\ \}$
+
+        $\{\ P\ \&\&\ !e\ \}\ $\texttt{x = x}$\ \{\ Q\ \}$
+      \end{center}
+
+      故原霍尔三元组成立。
+
+\end{document}
