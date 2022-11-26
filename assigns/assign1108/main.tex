@@ -1,0 +1,73 @@
+\documentclass[12pt]{article}
+
+\usepackage{geometry}
+\geometry{a4paper}
+
+\usepackage{graphicx}
+\usepackage{caption}
+
+\usepackage{ctex}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{stmaryrd}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+
+\lstset{
+  frame=single,
+  framerule=0pt,
+  backgroundcolor=\color{gray!15},
+  xleftmargin=2em,
+}
+
+\newcommand{\leqab}{\leq_{A \to B}}
+\newcommand{\leqb}{\leq_B}
+\newcommand{\st}{\textrm{ s.t. }}
+\newcommand{\lub}{\textrm{lub}}
+
+
+\title{Assignment 1108}
+\author{Ziqin Gong $\quad$ 520030910216}
+\date{}
+
+\begin{document}
+  \maketitle
+
+  \section*{1}
+
+    不成立。
+
+  \section*{2}
+
+    成立。可以使用\texttt{False}与\texttt{True}作为其循环不变量。
+
+  \section*{3}
+
+    \begin{lstlisting}
+y <= 2 * x && x == m
+    \end{lstlisting}
+
+  \section*{4}
+
+    \begin{gather*}
+      s = \sum_{i=1}^n i\  \text{ \&\& }\  \sum_{i=1}^{n-1} i \leq m \text{ \&\& } n \geq 0 \\ \text{（式中等号为数学意义上的相等，非赋值符号）}
+    \end{gather*}
+
+  \section*{5}
+
+    \begin{lstlisting}
+r * r > x && l * l <= x && x == n && l >= 0
+    \end{lstlisting}
+
+  \section*{6}
+
+    \begin{lstlisting}
+listrep(x)
+    \end{lstlisting}
+
+\end{document}
