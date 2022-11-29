@@ -1224,7 +1224,7 @@ Definition test0
 Definition test1
              (D: prog_state -> int64 -> Prop)
              (st1 st2: prog_state): Prop :=
-  exists n, st1 = st2 /\ D st1 n /\ Int64.unsigned n <> 0.
+  exists n, st1 = st2 /\ D st1 n /\ Int64.signed n <> 0.
 
 Definition if_denote
              (D0: prog_state -> int64 -> Prop)
@@ -2657,7 +2657,7 @@ Definition test0
 Definition test1
              (D: prog_state -> int64 -> Prop)
              (st1 st2: prog_state): Prop :=
-  exists n, st1 = st2 /\ D st1 n /\ Int64.unsigned n <> 0.
+  exists n, st1 = st2 /\ D st1 n /\ Int64.signed n <> 0.
 
 Definition test_err
              (D: prog_state -> int64 -> Prop)
@@ -2748,6 +2748,29 @@ Fixpoint ceval (c: com): cmd_denote :=
   | CIf e c1 c2 => if_denote (eeval e) (ceval c1) (ceval c2)
   | CWhile e c0 => while_denote (eeval e) (ceval c0)
   end.
+
+Theorem while_denote_is_fix: forall e c,
+  ((test1 (eeval e) ∘
+      (ceval c).(fin) ∘
+      (ceval (CWhile e c)).(fin)) ∪
+    test0 (eeval e) ==
+    (ceval (CWhile e c)).(fin))%sets.
+Proof.
+  intros.
+  assert (mono (fun X => (test1 (eeval e) ∘ (ceval c).(fin) ∘ X) ∪ test0 (eeval e)) /\
+          continuous (fun X => (test1 (eeval e) ∘ (ceval c).(fin) ∘ X) ∪ test0 (eeval e))).
+  {
+    apply union_right2_mono_and_continuous.
+    apply BinRel_concat_left_mono_and_continuous.
+    apply BinRel_concat_left_mono_and_continuous.
+    split.
+    + apply id_mono.
+    + apply id_continuous.
+  }
+  destruct H.
+  apply (BW_LFix_is_fix (fun X => (test1 (eeval e) ∘ (ceval c).(fin) ∘ X) ∪ test0 (eeval e)));
+  tauto.
+Qed.
 
 End WhileD_Cmd.
 
