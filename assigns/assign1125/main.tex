@@ -1,0 +1,77 @@
+\documentclass[11pt]{article}
+
+\usepackage{geometry}
+\geometry{a4paper}
+
+\usepackage{graphicx}
+\usepackage{caption}
+
+\usepackage{ctex}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{stmaryrd}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\usepackage{enumitem}
+\setitemize[1]{itemsep=0pt,parsep=\parskip,partopsep=0pt,topsep=5pt}
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+
+\lstset{
+  basicstyle=\footnotesize\ttfamily,
+  frame=single,
+  framerule=0pt,
+  backgroundcolor=\color{gray!15},
+  xleftmargin=2em,
+}
+
+
+\title{Assignment 1125}
+\author{Ziqin Gong $\quad$ 520030910216}
+\date{}
+
+\begin{document}
+  \maketitle
+
+  \section*{1}
+
+    \begin{lstlisting}
+( * (p + 8), eps ) -> ( p + 8, KDeref ) @ s
+( p + 8, KDeref ) -> ( p, KBinopL(+, 8), KDeref ) @ s
+( p, KBinopL(+, 8), KDeref ) -> ( 0x100, KBinopL(+, 8), KDeref ) @ s
+( 0x100, KBinopL(+, 8), KDeref ) -> ( 8, KBinopR(0x100, +), KDeref ) @ s
+( 8, KBinopR(0x100, +), KDeref ) -> ( 0x108, KDeref ) @ s
+( 0x108, KDeref ) -> ( 0, eps ) @ s
+    \end{lstlisting}
+
+  \section*{2}
+
+    Evaluation context中应删去KBinopL和KBinopR，并添加如下context:
+    \begin{itemize}
+      \item \texttt{KBinopLe (op: binop) (e: expr)}: 正在对加法左边的表达式求值，且右边的表达式尚未求值
+      \item \texttt{KBinopeR (e: expr) (op: binop)}: 正在对加法右边的表达式求值，且左边的表达式尚未求值
+      \item \texttt{KBinopLn (op: binop) (n: int64)}: 正在对加法左边的表达式求值，且右边的表达式已经求值完毕，值为\texttt{n}
+      \item \texttt{KBinopnR (n: int64) (op: binop)}: 正在对加法右边的表达式求值，且左边的表达式已经求值完毕，值为\texttt{n}
+    \end{itemize}
+
+    删去所有的原加法的小步语义规则，并添加如下规则：
+    \begin{lstlisting}
+( e1 + e2, eps ) -> ( e1, KBinopLe(+, e2) ) or ( e2, KBinopeR(e1, +) ) @ s
+    \end{lstlisting}
+    \begin{lstlisting}
+( n1, KBinopLe(+, e2) ) -> ( e2, KBinopnR(n1, +) ) @ s
+    \end{lstlisting}
+    \begin{lstlisting}
+( n2, KBinopeR(e1, +) ) -> ( e1, KBinopLn(+, n2) ) @ s
+    \end{lstlisting}
+    \begin{lstlisting}
+If n == n1 + n2 and -2^63 <= n <= 2^63-1,
+  ( n2, KBinopnR(n1, +) ) -> ( n, eps ) @ s
+  ( n1, KBinopLn(+, n2) ) -> ( n, eps ) @ s
+    \end{lstlisting}
+
+\end{document}
