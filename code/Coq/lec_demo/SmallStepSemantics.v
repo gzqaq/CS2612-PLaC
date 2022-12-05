@@ -912,6 +912,17 @@ Fixpoint cl_eval (cl: com_loc): prog_state -> prog_state -> Prop :=
   | CL_CCont cl0 k => (cl_eval cl0) ∘ (ck_eval k)
   end.
 
+(*
+suppose s0.(vars) x = 3
+
+while (x > 0) do { x = x - 1 } =>
+x > 0, KWhileCond (x > 0) (x = x - 1) =>
+x, KBinopL(>, 0), KWhileCond (x > 0) (x = x - 1) =>
+
+[[ x ]] = fun s n => s.(vars) x = n
+[[ x, BinopL(>, 0) ]] = fun s n => s.(vars) x > 0 /\ n = 1 \/ s.(vars) x = 0 /\ n = 0
+ *)
+
 Lemma cstep_sound: forall cl1 s1 cl2 s2 s,
   cstep (cl1, s1) (cl2, s2) ->
   cl_eval cl2 s2 s ->
