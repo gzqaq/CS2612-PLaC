@@ -1,0 +1,15 @@
+SEQ(DECL(n),SEQ(ASGN(VAR(n),READ_INT()),SEQ(IF(GE(VAR(n),CONST(0)),WRITE_INT(VAR(n)),WRITE_INT(UMINUS(VAR(n)))),WRITE_CHAR(CONST(10)))))
+{
+  #0 = read_int()
+  if (GE(#0, $(0)))
+  then
+  {
+    write_int(#0)
+  }
+  else
+  {
+    #1 = UMINUS(#0)
+    write_int(#1)
+  }
+  write_char($(10))
+}

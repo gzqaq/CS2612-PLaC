@@ -1,0 +1,17 @@
+SEQ(DECL(n),SEQ(DECL(i),SEQ(DECL(s),SEQ(ASGN(VAR(n),READ_INT()),SEQ(ASGN(VAR(i),CONST(0)),SEQ(ASGN(VAR(s),CONST(0)),SEQ(WHILE(LT(VAR(i),VAR(n)),SEQ(ASGN(VAR(s),PLUS(VAR(s),READ_INT())),ASGN(VAR(i),PLUS(VAR(i),CONST(1))))),SEQ(WRITE_INT(VAR(s)),WRITE_CHAR(CONST(10))))))))))
+{
+  #0 = read_int()
+  #1 = $(0)
+  #2 = $(0)
+  do
+  {
+  }
+  while (LT(#1, #0)) do
+  {
+    #3 = read_int()
+    #2 = PLUS(#2, #3)
+    #1 = PLUS(#1, $(1))
+  }
+  write_int(#2)
+  write_char($(10))
+}
