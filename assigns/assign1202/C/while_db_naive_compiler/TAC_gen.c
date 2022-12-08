@@ -73,6 +73,9 @@ struct L1_expr * TAC_gen_expr(struct expr * e,
       }
       else {
         // TODO：请在此处实现二元运算符为T_OR的情况
+        L1_CmdListBox_Add1(cs, L1_TIf(res_right1,
+                                      L1_CmdListBox_Single(L1_TAsgnVar(vcnt, L1_TConstOrVar(L1_TConst(1)))),
+                                      cs0));
       }
       return L1_TConstOrVar(L1_TVar(vcnt));
     }
@@ -90,6 +93,9 @@ struct L1_expr * TAC_gen_expr(struct expr * e,
   }
   case T_UNOP: {
     // TODO：请在此处实现一元运算符的情况
+    struct L1_expr * arg = TAC_gen_expr(e -> d.UNOP.arg, var_idents, p_vcnt, cs);
+    struct L1_const_or_var * cv = optional_add_asgn_cv(arg, p_vcnt, cs);
+    return L1_TUnop(e->d.UNOP.op, cv);
   }
   case T_DEREF: {
     struct L1_expr * arg =
@@ -134,6 +140,15 @@ struct L1_cmd_listbox * TAC_gen_cmd(struct cmd * c,
     }
     case T_DEREF: {
       // TODO：请在此处实现向地址赋值的情况
+      struct expr * arg = c->d.ASGN.left->d.DEREF.arg;
+      struct L1_cmd_listbox * cs = L1_CmdListBox_Empty();
+      struct L1_expr * res_left = TAC_gen_expr(arg, var_idents, p_vcnt, cs);
+      unsigned int name = optional_add_asgn_var(res_left, p_vcnt, cs);
+      struct L1_expr * res_right = TAC_gen_expr(c->d.ASGN.right, var_idents, p_vcnt, cs);
+      struct L1_const_or_var * cv = optional_add_asgn_cv(res_right, p_vcnt, cs);
+      L1_CmdListBox_Add1(cs, L1_TAsgnMem(name, cv));
+
+      return cs;
     }
     default: {
       printf("Ilegal assignment command.\n");
@@ -172,6 +187,13 @@ struct L1_cmd_listbox * TAC_gen_cmd(struct cmd * c,
   }
   case T_WHILE: {
     // TODO：请在此处实现while循环语句的转换方案
+    struct L1_cmd_listbox * cs = L1_CmdListBox_Empty();
+    struct L1_cmd_listbox * pre = L1_CmdListBox_Empty();
+    struct L1_expr * res_cond = TAC_gen_expr(c->d.WHILE.cond, var_idents, p_vcnt, pre);
+    struct L1_cmd_listbox * body = TAC_gen_cmd(c->d.WHILE.body, var_idents, p_vcnt);
+    L1_CmdListBox_Add1(cs, L1_TWhile(pre, res_cond, body));
+
+    return cs;
   }
   case T_WI: {
     struct L1_cmd_listbox * cs = L1_CmdListBox_Empty();
