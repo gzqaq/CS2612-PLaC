@@ -1,0 +1,7 @@
+SEQ(DECL(n),SEQ(DECL(m),SEQ(ASGN(VAR(n),READ_INT()),SEQ(ASGN(VAR(m),PLUS(VAR(n),CONST(1))),WRITE_INT(PLUS(VAR(m),CONST(2)))))))
+Block 0:
+  #0 = read_int()
+  #1 = PLUS(#0, $(1))
+  #2 = PLUS(#1, $(2))
+  write_int(#2)
+  jmp 1

@@ -1,0 +1,32 @@
+SEQ(DECL(n),SEQ(DECL(i),SEQ(DECL(p),SEQ(DECL(q),SEQ(DECL(s),SEQ(ASGN(VAR(n),READ_INT()),SEQ(ASGN(VAR(i),CONST(0)),SEQ(ASGN(VAR(p),CONST(0)),SEQ(WHILE(LT(VAR(i),VAR(n)),SEQ(ASGN(VAR(q),MALLOC(CONST(16))),SEQ(ASGN(DEREF(VAR(q)),READ_INT()),SEQ(ASGN(DEREF(PLUS(VAR(q),CONST(8))),VAR(p)),SEQ(ASGN(VAR(p),VAR(q)),ASGN(VAR(i),PLUS(VAR(i),CONST(1)))))))),SEQ(ASGN(VAR(s),CONST(0)),SEQ(WHILE(NE(VAR(p),CONST(0)),SEQ(ASGN(VAR(s),PLUS(VAR(s),DEREF(VAR(p)))),ASGN(VAR(p),DEREF(PLUS(VAR(p),CONST(8)))))),SEQ(WRITE_INT(VAR(s)),WRITE_CHAR(CONST(10))))))))))))))
+Block 0:
+  #0 = read_int()
+  #1 = $(0)
+  #2 = $(0)
+  jmp 1
+Block 1:
+  if (LT(#1, #0)) then jmp 2 else jmp 3
+Block 2:
+  #3 = malloc($(16))
+  #5 = read_int()
+  * #3 = #5
+  #6 = PLUS(#3, $(8))
+  * #6 = #2
+  #2 = #3
+  #1 = PLUS(#1, $(1))
+  jmp 1
+Block 3:
+  #4 = $(0)
+  jmp 4
+Block 4:
+  if (NE(#2, $(0))) then jmp 5 else jmp 6
+Block 5:
+  #7 = DEREF(#2)
+  #4 = PLUS(#4, #7)
+  #8 = PLUS(#2, $(8))
+  #2 = DEREF(#8)
+  jmp 4
+Block 6:
+  write_int(#4)
+  write_char($(10))
+  jmp 7

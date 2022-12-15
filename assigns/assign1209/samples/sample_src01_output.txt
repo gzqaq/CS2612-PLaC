@@ -1,0 +1,50 @@
+SEQ(DECL(n),SEQ(DECL(i),SEQ(DECL(flag),SEQ(ASGN(VAR(n),READ_INT()),SEQ(ASGN(VAR(i),CONST(2)),SEQ(ASGN(VAR(flag),CONST(1)),SEQ(WHILE(AND(VAR(flag),LE(MUL(VAR(i),VAR(i)),VAR(n))),SEQ(IF(EQ(MOD(VAR(n),VAR(i)),CONST(0)),ASGN(VAR(flag),CONST(0)),ASGN(VAR(flag),CONST(1))),ASGN(VAR(i),PLUS(VAR(i),CONST(1))))),IF(VAR(flag),SEQ(WRITE_CHAR(CONST(80)),SEQ(WRITE_CHAR(CONST(82)),SEQ(WRITE_CHAR(CONST(73)),SEQ(WRITE_CHAR(CONST(77)),SEQ(WRITE_CHAR(CONST(69)),WRITE_CHAR(CONST(10))))))),SEQ(WRITE_CHAR(CONST(78)),SEQ(WRITE_CHAR(CONST(79)),SEQ(WRITE_CHAR(CONST(78)),SEQ(WRITE_CHAR(CONST(80)),SEQ(WRITE_CHAR(CONST(82)),SEQ(WRITE_CHAR(CONST(73)),SEQ(WRITE_CHAR(CONST(77)),SEQ(WRITE_CHAR(CONST(69)),WRITE_CHAR(CONST(10))))))))))))))))))
+Block 0:
+  #0 = read_int()
+  #1 = $(2)
+  #2 = $(1)
+  jmp 1
+Block 1:
+  if (#2) then jmp 4 else jmp 5
+Block 4:
+  #3 = MUL(#1, #1)
+  #4 = LE(#3, #0)
+  jmp 6
+Block 5:
+  #4 = $(0)
+  jmp 6
+Block 6:
+  if (#4) then jmp 2 else jmp 3
+Block 2:
+  #5 = MOD(#0, #1)
+  if (EQ(#5, $(0))) then jmp 7 else jmp 8
+Block 7:
+  #2 = $(0)
+  jmp 9
+Block 8:
+  #2 = $(1)
+  jmp 9
+Block 9:
+  #1 = PLUS(#1, $(1))
+  jmp 1
+Block 3:
+  if (#2) then jmp 10 else jmp 11
+Block 10:
+  write_char($(80))
+  write_char($(82))
+  write_char($(73))
+  write_char($(77))
+  write_char($(69))
+  write_char($(10))
+  jmp 12
+Block 11:
+  write_char($(78))
+  write_char($(79))
+  write_char($(78))
+  write_char($(80))
+  write_char($(82))
+  write_char($(73))
+  write_char($(77))
+  write_char($(69))
+  write_char($(10))
+  jmp 12

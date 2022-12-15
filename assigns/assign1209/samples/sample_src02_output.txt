@@ -1,0 +1,17 @@
+SEQ(DECL(n),SEQ(DECL(i),SEQ(DECL(s),SEQ(ASGN(VAR(n),READ_INT()),SEQ(ASGN(VAR(i),CONST(0)),SEQ(ASGN(VAR(s),CONST(0)),SEQ(WHILE(LT(VAR(i),VAR(n)),SEQ(ASGN(VAR(s),PLUS(VAR(s),READ_INT())),ASGN(VAR(i),PLUS(VAR(i),CONST(1))))),SEQ(WRITE_INT(VAR(s)),WRITE_CHAR(CONST(10))))))))))
+Block 0:
+  #0 = read_int()
+  #1 = $(0)
+  #2 = $(0)
+  jmp 1
+Block 1:
+  if (LT(#1, #0)) then jmp 2 else jmp 3
+Block 2:
+  #3 = read_int()
+  #2 = PLUS(#2, #3)
+  #1 = PLUS(#1, $(1))
+  jmp 1
+Block 3:
+  write_int(#2)
+  write_char($(10))
+  jmp 4
